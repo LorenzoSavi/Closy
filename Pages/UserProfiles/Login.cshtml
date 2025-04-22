@@ -1,0 +1,111 @@
+﻿@page
+@model Closy.Pages.UserProfiles.LoginModel
+@{
+    ViewData["Title"] = "Accedi a Closy";
+}
+
+<link rel="stylesheet" href="~/css/falling-emojis.css" />
+
+<div class="falling-emojis" id="emojiContainer"></div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="login-card animate__animated animate__fadeInUp">
+                <h2 class="text-center mb-4">Accedi a Closy</h2>
+
+                <form method="post">
+                    <div class="form-group mb-3">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="Email" required
+                               placeholder="Inserisci la tua email">
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" name="Password" required
+                               placeholder="Inserisci la tua password">
+                        <div class="d-flex justify-content-end">
+                            <small><a href="#" class="text-primary text-decoration-none">Password dimenticata?</a></small>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="RememberMe">
+                        <label class="form-check-label" for="rememberMe">Ricordami</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mb-3 hover-effect">Accedi</button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <p>Non hai un account? <a href="/UserProfiles/register" class="text-primary">Registrati</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        margin-top: 3rem;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+            border-color: #80bdff;
+        }
+
+    .hover-effect {
+        transition: all 0.3s ease;
+    }
+
+        .hover-effect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+    h2 {
+        color: #2c3e50;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    const emojis = ['👕', '👔', '👗', '👖', '👠', '👟', '👢', '👞', '🧢', '🧣', '🧤', '🧥'];
+    const container = document.getElementById('emojiContainer');
+
+    function createEmoji() {
+        const emoji = document.createElement('div');
+        emoji.className = 'emoji';
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.left = Math.random() * 100 + 'vw';
+        emoji.style.animationDuration = Math.random() * 20 + 10 + 's';
+        container.appendChild(emoji);
+
+        emoji.addEventListener('animationend', () => {
+            emoji.remove();
+        });
+    }
+
+    setInterval(createEmoji, 1000);
+    for (let i = 0; i < 10; i++) {
+        createEmoji();
+    }
+</script>

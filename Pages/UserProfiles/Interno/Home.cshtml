@@ -1,0 +1,225 @@
+﻿@page
+@model Closy.Pages.UserProfiles.Interno.HomeModel
+@{
+    ViewData["Title"] = "Il mio Profilo";
+}
+
+<div class="container">
+    <div class="row">
+        <!-- Sezione Profilo -->
+        <div class="col-md-4 mb-4">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <span class="avatar-text">@Model.UserProfile.Username.Substring(0, 1).ToUpper()</span>
+                    </div>
+                    <h2 class="mt-3">@Model.UserProfile.Username</h2>
+                    <p class="text-muted">@Model.UserProfile.Email</p>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <h3>@Model.TotalItems</h3>
+                        <p>Capi Totali</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>@Model.Categories.Count()</h3>
+                        <p>Categorie</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sezione Capi d'Abbigliamento -->
+        <div class="col-md-8">
+            <div class="clothing-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3>Il Mio Guardaroba</h3>
+                    <a href="/UserProfiles/Interno/AddClothingItem" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i> Aggiungi Capo
+                    </a>
+                </div>
+
+                <!-- Filtro Categorie -->
+                <div class="category-filter mb-4">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn @(Model.CurrentCategory == null ? "btn-primary" : "btn-outline-primary") category-btn"
+                                onclick="filterCategory('')">
+                            Tutti
+                        </button>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <button class="btn @(Model.CurrentCategory == category ? "btn-primary" : "btn-outline-primary") category-btn"
+                                    onclick="filterCategory('@category')">
+                                @category
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Griglia Capi -->
+                <div class="row g-4" id="clothingGrid">
+                    @foreach (var item in Model.ClothingItems)
+                    {
+                        <div class="col-md-6 col-lg-4 clothing-item" data-category="@item.Category">
+                            <div class="card h-100">
+                                @if (!string.IsNullOrEmpty(item.ImagePath))
+                                {
+                                    <img src="@item.ImagePath" class="card-img-top clothing-img" alt="@item.Name">
+                                }
+                                else
+                                {
+                                    <div class="no-image">
+                                        <i class="bi bi-card-image"></i>
+                                    </div>
+                                }
+                                <div class="card-body">
+                                    <h5 class="card-title">@item.Name</h5>
+                                    <p class="card-text"><small class="text-muted">@item.Category</small></p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteItem(@item.Id)">
+                                        <i class="bi bi-trash"></i> Elimina
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .avatar-text {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+    }
+
+    .stat-item h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #4a5568;
+    }
+
+    .stat-item p {
+        color: #718096;
+        margin: 0;
+    }
+
+    .clothing-section {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+    }
+
+    .category-btn {
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+    }
+
+    .clothing-img {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .no-image {
+        height: 200px;
+        background: #f7fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .no-image i {
+            font-size: 3rem;
+            color: #cbd5e0;
+        }
+
+    .card {
+        transition: transform 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+</style>
+
+@section Scripts {
+    <script>
+        function filterCategory(category) {
+            const items = document.querySelectorAll('.clothing-item');
+            items.forEach(item => {
+                if (!category || item.dataset.category === category) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Aggiorna i pulsanti di categoria
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if ((btn.innerText === 'Tutti' && !category) ||
+                    (btn.innerText === category)) {
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-primary');
+                } else {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-outline-primary');
+                }
+            });
+        }
+
+        async function deleteItem(itemId) {
+            if (confirm('Sei sicuro di voler eliminare questo capo?')) {
+                try {
+                    const response = await fetch(`/api/ClothingItems/${itemId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Si è verificato un errore durante l\'eliminazione del capo');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Si è verificato un errore durante l\'eliminazione del capo');
+                }
+            }
+        }
+    </script>
+}

@@ -1,0 +1,124 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Closy - Il tuo guardaroba digitale";
+}
+
+<link rel="stylesheet" href="~/css/falling-emojis.css" />
+
+<div class="falling-emojis" id="emojiContainer"></div>
+
+<div class="container text-center mt-5">
+    <div class="welcome-section mb-5">
+        <h1 class="display-4 animate__animated animate__fadeInDown">Benvenuto in Closy</h1>
+        <p class="lead mb-4 animate__animated animate__fadeIn animate__delay-1s">Il tuo guardaroba personale, sempre con te</p>
+    </div>
+
+    <div class="features-section mb-5 animate__animated animate__fadeInUp animate__delay-1s">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <h3>📸 Cataloga</h3>
+                    <p>Fotografa e organizza tutti i tuoi vestiti in modo semplice e veloce</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <h3>👕 Gestisci</h3>
+                    <p>Tieni traccia di tutti i tuoi capi preferiti in un unico posto</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <h3>🎨 Crea</h3>
+                    <p>Componi outfit perfetti per ogni occasione con un click</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="action-buttons animate__animated animate__fadeInUp animate__delay-2s">
+        <a href="/UserProfiles/login" class="btn btn-primary btn-lg m-2 hover-effect">Accedi</a>
+        <a href="/UserProfiles/register" class="btn btn-outline-primary btn-lg m-2 hover-effect">Registrati</a>
+    </div>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .welcome-section {
+        padding: 2rem 0;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        margin: 1rem 0;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .action-buttons {
+        margin-top: 2rem;
+    }
+
+    .btn-lg {
+        padding: 1rem 2.5rem;
+        font-size: 1.2rem;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .hover-effect:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+        color: #2c3e50;
+        font-weight: bold;
+    }
+
+    .lead {
+        color: #34495e;
+    }
+</style>
+
+<script>
+    const emojis = ['👕', '👔', '👗', '👖', '👠', '👟', '👢', '👞', '🧢', '🧣', '🧤', '🧥'];
+    const container = document.getElementById('emojiContainer');
+
+    function createEmoji() {
+        const emoji = document.createElement('div');
+        emoji.className = 'emoji';
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.left = Math.random() * 100 + 'vw';
+        emoji.style.animationDuration = Math.random() * 20 + 10 + 's';
+        container.appendChild(emoji);
+
+        emoji.addEventListener('animationend', () => {
+            emoji.remove();
+        });
+    }
+
+    setInterval(createEmoji, 1000);
+    for(let i = 0; i < 10; i++) {
+        createEmoji();
+    }
+</script>
