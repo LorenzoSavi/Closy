@@ -17,7 +17,7 @@ La dashboard è il punto di partenza dopo l'accesso. Qui puoi vedere:
 - **I tuoi outfit preferiti**: Una panoramica degli outfit che hai salvato come preferiti.
 - **Azioni rapide**: Pulsanti per aggiungere un capo, creare un outfit o esplorare il guardaroba.
 
-![Dashboard](docs/images/dashboard.png)
+![Dashboard](img/dashboard.png)
 
 ---
 
@@ -25,8 +25,8 @@ La dashboard è il punto di partenza dopo l'accesso. Qui puoi vedere:
 - **Tutti i capi**: Visualizza l'elenco completo dei tuoi capi d'abbigliamento.
 - **Aggiungi un capo**: Carica un nuovo capo al tuo guardaroba con foto, categoria e descrizione.
 
-![Tutti i capi](docs/images/garments.png)
-![Aggiungi capo](docs/images/add_garment.png)
+![Tutti i capi](img/garments.png)
+![Aggiungi capo](imag/add_garment.png)
 
 ---
 
@@ -35,7 +35,7 @@ Crea outfit combinando i capi presenti nel tuo guardaroba:
 - **Selezione dei capi**: Scegli i capi che vuoi includere nell'outfit.
 - **Salvataggio**: Salva l'outfit per rivederlo e modificarlo in seguito.
 
-![Crea outfit](docs/images/create_outfit.png)
+![Crea outfit](img/create_outfit.png)
 
 
 ## Funzionalità Principali
