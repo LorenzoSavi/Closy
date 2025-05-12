@@ -1,0 +1,246 @@
+@page
+@model Closy.Pages.Wardrobe.GenerateOutfitModel
+@{
+    ViewData["Title"] = "Genera Outfit con AI";
+}
+
+<style>
+    /* Remove or comment out old/conflicting styles for color and season pickers below */
+    /* e.g., .color-selector-container, .color-option, .color-swatch, */
+    /* .season-selector-container, .season-option */
+
+    /* --- Color Picker Styles (to match Create.cshtml & site.css) --- */
+    .color-picker-wrapper {
+        width: 40px; /* from site.css .color-option */
+        height: 40px; /* from site.css .color-option */
+        border-radius: 50%; /* from site.css .color-option */
+        cursor: pointer;
+        transition: all 0.3s ease; /* from site.css .color-option */
+        position: relative; /* For tooltip positioning or future adornments */
+    }
+
+    .color-picker-wrapper:hover {
+        transform: scale(1.1); /* from site.css .color-option:hover */
+    }
+
+    .color-picker-label.btn {
+        width: 100%; /* Fill the wrapper */
+        height: 100%; /* Fill the wrapper */
+        padding: 0; /* Remove Bootstrap padding for a pure swatch */
+        border-radius: 50%; /* Ensure the label itself is a circle */
+        /* background-color is set inline via style attribute */
+        /* border: 1px solid #ced4da; */ /* Default border from btn-outline-secondary */
+    }
+
+    /* Checked state for color picker */
+    .btn-check:checked + .color-picker-label.btn {
+        /* transform: scale(1.1); */ /* Hover already does this, or can be combined if desired */
+        border: 2px solid var(--primary-color) !important; /* Key style from Create.cshtml */
+        box-shadow: none; /* Create.cshtml doesn't show a shadow for selected color */
+    }
+
+    /* --- Season Picker Styles (to match Create.cshtml) --- */
+    .season-picker-label.btn { /* Applied to the <label> which has .btn and .btn-outline-primary */
+        background-color: #F8F9FA !important; /* from Create.cshtml .season-btn */
+        border: 1px solid #dee2e6 !important; /* from Create.cshtml .season-btn */
+        color: #212529; /* Default text color */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 80px; /* Adjust if no icons, or match Create.cshtml if text only */
+        text-align: center;
+        transition: all 0.2s ease-in-out;
+        /* p-3 is on the label in HTML, providing padding */
+    }
+
+    .season-picker-label.btn:hover {
+        background-color: #e9ecef !important; /* from Create.cshtml .season-btn:hover */
+        border-color: var(--primary-color) !important; /* from Create.cshtml .season-btn:hover */
+        transform: translateY(-3px); /* from Create.cshtml .season-btn:hover */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* from Create.cshtml .season-btn:hover */
+    }
+
+    /* Checked state for season picker */
+    .btn-check:checked + .season-picker-label.btn {
+        transform: scale(1.05) translateY(-2px); /* translateY might be optional if hover already does it */
+        box-shadow: 0 6px 15px rgba(var(--bs-primary-rgb), 0.3); /* from Create.cshtml */
+        background-color: var(--primary-color) !important; /* from Create.cshtml */
+        border-color: var(--primary-color) !important; /* from Create.cshtml */
+        color: white !important; /* from Create.cshtml */
+    }
+
+    /* Tooltip pointer */
+    [data-bs-toggle="tooltip"] {
+        cursor: pointer;
+    }
+
+    /* Styles for selected items preview (KEEP EXISTING) */
+    .selected-items-preview {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+    }
+
+    .selected-item-tag {
+        display: inline-block;
+        background-color: var(--primary-color-light);
+        color: var(--primary-color);
+        padding: 0.3rem 0.7rem;
+        border-radius: 15px;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    /* ... rest of the existing styles ... */
+</style>
+
+<div class="container mt-4">
+    <div class="page-header mb-4">
+        <h1><i class="bi bi-magic"></i> @ViewData["Title"]</h1>
+        <p>Seleziona capi, colori o stagioni per ricevere suggerimenti personalizzati dall'AI.</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <form method="post" asp-page-handler="Generate">
+        <div class="row">
+            <div class="col-lg-7">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Preferenze per la Generazione</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="selectedItems" class="form-label fw-bold">1. Scegli capi specifici (opzionale):</label>
+                            <p class="form-text text-muted small">Seleziona uno o più capi dal tuo guardaroba che vuoi includere negli outfit. L'AI cercherà di utilizzarli.</p>
+                            <select asp-for="SelectedItemIds" class="form-select" multiple="multiple" id="selectedItems" style="height: 200px;">
+                                @foreach (var categoryGroup in Model.AllClothingItems.GroupBy(item => item.Category).OrderBy(g => g.Key))
+                                {
+                                    <optgroup label="@categoryGroup.Key">
+                                        @foreach (var item in categoryGroup.OrderBy(i => i.Name))
+                                        {
+                                            <option value="@item.Id">@item.Name (@item.Color)</option>
+                                        }
+                                    </optgroup>
+                                }
+                            </select>
+                            <small class="form-text text-muted">Tieni premuto Ctrl (o Cmd su Mac) per selezionare più capi.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">2. Colori preferiti (opzionale):</label>
+                             <p class="form-text text-muted small">Indica i colori che vorresti vedere nei suggerimenti.</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var color in Model.AvailableColors)
+                                {
+                                    var colorId = "gen_color_" + color.Name.Replace(" ", "").ToLower() + color.Hex.Replace("#","");
+                                    <div class="color-picker-wrapper" data-bs-toggle="tooltip" title="@color.Name">
+                                        <input type="checkbox" class="btn-check" asp-for="SelectedColors" value="@color.Name" id="@colorId" />
+                                        <label class="btn btn-outline-secondary color-picker-label @(color.Hex.Equals("#FFFFFF", StringComparison.OrdinalIgnoreCase) || color.Hex.Equals("#FFF", StringComparison.OrdinalIgnoreCase) ? "border" : "")"
+                                               for="@colorId"
+                                               style="background-color: @color.Hex;">
+                                            @* Label is empty, background is the color. Add &nbsp; if clickability is an issue. *@
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">3. Stagioni (opzionale):</label>
+                            <p class="form-text text-muted small">Seleziona le stagioni per cui desideri gli outfit.</p>
+                            <div class="row g-2">
+                                @foreach (var season in Model.AvailableSeasons)
+                                {
+                                    var seasonId = "gen_season_" + season.ToLower().Replace(" ", "").Replace("'", "");
+                                    <div class="col-6 col-md-3">
+                                        <input type="checkbox" class="btn-check" asp-for="SelectedSeasons" value="@season" id="@seasonId" />
+                                        <label class="btn btn-outline-primary season-picker-label w-100 p-3" for="@seasonId">
+                                            <span>@season</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                         <div class="mb-3">
+                            <label asp-for="Occasion" class="form-label fw-bold">4. Occasione (opzionale):</label>
+                             <p class="form-text text-muted small">Specifica un'occasione d'uso (es. "lavoro", "tempo libero", "serata elegante").</p>
+                            <input asp-for="Occasion" type="text" class="form-control" placeholder="Es: Lavoro, Casual, Formale"/>
+                        </div>
+                                                                                    
+
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="bi bi-stars"></i> Genera Suggerimenti
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                @if (Model.GeneratedOutfits != null && Model.GeneratedOutfits.Any())
+                {
+                    <div class="sticky-top" style="top: 20px;">
+                        <h4 class="mb-3">✨ Suggerimenti Generati ✨</h4>
+                        @foreach (var outfit in Model.GeneratedOutfits)
+                        {
+                            <div class="card mb-3 shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title">@outfit.Name</h5>
+                                    <p class="card-text">@outfit.Description</p>
+                                    @if (outfit.Items != null && outfit.Items.Any())
+                                    {
+                                        <h6>Capi inclusi:</h6>
+                                        <ul class="list-unstyled">
+                                            @foreach (var item in outfit.Items)
+                                            {
+                                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>@item</li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted small">Nessun capo specifico elencato per questo suggerimento.</p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (Model.ErrorMessage == null)
+                {
+                     <div class="sticky-top" style="top: 20px;">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center">
+                                <i class="bi bi-lightbulb-fill" style="font-size: 3rem; color: var(--primary-color);"></i>
+                                <h5 class="mt-3">Pronto per l'ispirazione?</h5>
+                                <p class="text-muted">Compila le tue preferenze a sinistra e clicca su "Genera Suggerimenti" per vedere la magia dell'AI!</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Inizializza i tooltip di Bootstrap (se non già fatto globalmente)
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+        // Script per aggiornare l'anteprima dei capi selezionati (opzionale)
+        // Potrebbe essere aggiunto qui se si vuole un'anteprima dinamica dei capi scelti
+        // dalla multiselect.
+    </script>
+}

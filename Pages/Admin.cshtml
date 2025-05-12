@@ -1,0 +1,199 @@
+@page
+@model Closy.Pages.AdminModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <h2>Dashboard</h2>
+        <p class="text-muted">Benvenuto nel pannello di amministrazione di Closy.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Utenti</h5>
+                        <h3 class="mb-0">@Model.TotalUsers</h3>
+                    </div>
+                    <div class="text-primary">
+                        <i class="bi bi-people-fill fs-1"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a asp-page="/Admin/Users/Index" class="btn btn-sm btn-outline-primary">
+                    Gestisci utenti <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Capi</h5>
+                        <h3 class="mb-0">@Model.TotalItems</h3>
+                    </div>
+                    <div class="text-success">
+                        <i class="bi bi-grid-3x3-gap-fill fs-1"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a asp-page="/Admin/Items/Index" class="btn btn-sm btn-outline-success">
+                    Gestisci capi <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Outfit</h5>
+                        <h3 class="mb-0">@Model.TotalOutfits</h3>
+                    </div>
+                    <div class="text-info">
+                        <i class="bi bi-collection-fill fs-1"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a asp-page="/Admin/Outfits/Index" class="btn btn-sm btn-outline-info">
+                    Gestisci outfit <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Spazio usato</h5>
+                        <h3 class="mb-0">@Model.StorageUsedFormatted</h3>
+                    </div>
+                    <div class="text-warning">
+                        <i class="bi bi-hdd-fill fs-1"></i>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: @Model.StoragePercentage%;" aria-valuenow="@Model.StoragePercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted">@Model.StoragePercentage% del limite</small>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <button class="btn btn-sm btn-outline-warning">
+                    Gestisci storage <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Ultimi utenti registrati</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.RecentUsers)
+                            {
+                                <tr>
+                                    <td>@user.Email</td>
+                                    <td>
+                                        <a asp-page="/Admin/Users/Details" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-info-circle"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent text-end">
+                <a asp-page="/Admin/Users/Index" class="btn btn-sm btn-outline-secondary">
+                    Vedi tutti <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Statistiche</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Utenti attivi oggi</h6>
+                                <h4>@Model.ActiveUsersToday</h4>
+                            </div>
+                            <div class="text-primary">
+                                <i class="bi bi-person-check fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Nuovi capi oggi</h6>
+                                <h4>@Model.NewItemsToday</h4>
+                            </div>
+                            <div class="text-success">
+                                <i class="bi bi-plus-circle fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Media capi per utente</h6>
+                                <h4>@Model.AvgItemsPerUser</h4>
+                            </div>
+                            <div class="text-info">
+                                <i class="bi bi-bar-chart fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Categoria più popolare</h6>
+                                <h4>@Model.MostPopularCategory</h4>
+                            </div>
+                            <div class="text-warning">
+                                <i class="bi bi-star fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

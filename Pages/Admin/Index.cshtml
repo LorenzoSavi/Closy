@@ -1,0 +1,648 @@
+﻿@page
+@model closy.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Dashboard Admin";
+    Layout = "_LayoutNoSidebar";
+
+}
+
+<div class="admin-container">
+    <!-- Sidebar resta uguale -->
+    <!-- Main Content -->
+    <main class="admin-main">
+        <header class="admin-header">
+            <div class="header-title">
+                <h1>Dashboard Admin</h1>
+                <p>Benvenuto nel pannello di amministrazione - Ultimo accesso: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+            </div>
+        </header>
+
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-icon users-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@Model.TotalUsers</h3>
+                    <p>Utenti registrati</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon items-icon">
+                    <i class="bi bi-hanger"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@Model.TotalItems</h3>
+                    <p>Capi catalogati</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon storage-icon">
+                    <i class="bi bi-hdd"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@Model.TotalStorage.ToString("F2") GB</h3>
+                    <p>Spazio utilizzato</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Users Section -->
+        <div class="card recent-users">
+            <div class="card-header">
+                <h2>Utenti recenti</h2>
+                <a href="/Admin/Users" class="view-all">Gestisci tutti gli utenti</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Utente</th>
+                                <th>Email</th>
+                                <th>Registrato</th>
+                                <th>Stato</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.RecentUsers)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="user-info">
+                                            <img src="@user.ProfilePictureUrl" alt="@user.Nome" />
+                                            <span>@user.Nome @user.Cognome</span>
+                                        </div>
+                                    </td>
+                                    <td>@user.Email</td>
+                                    <td>@user.DataRegistrazione.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <span class="status active">Attivo</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/Admin/Users/Details?id=@user.Id" class="btn-icon" title="Visualizza">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #6a5acd;
+            --secondary-color: #9370db;
+            --accent-color: #7b68ee;
+            --dark-color: #2c3e50;
+            --text-color: #333;
+            --text-light: #6c757d;
+            --light-color: #f8f9fa;
+            --border-color: #e9ecef;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .admin-sidebar {
+            width: 260px;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .admin-nav {
+            flex: 1;
+            padding: 1.5rem 0;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+            .nav-section h5 {
+                padding: 0 1.5rem;
+                margin-bottom: 0.75rem;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--text-light);
+                font-weight: 600;
+            }
+
+            .nav-section ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .nav-section li {
+                margin-bottom: 0.25rem;
+            }
+
+            .nav-section a, .logout-link {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.75rem 1.5rem;
+                color: var(--text-color);
+                text-decoration: none;
+                transition: all 0.2s;
+                font-size: 0.9rem;
+                background: none;
+                border: none;
+                cursor: pointer;
+                width: 100%;
+                text-align: left;
+            }
+
+                .nav-section a.active {
+                    background-color: rgba(106, 90, 205, 0.1);
+                    color: var(--primary-color);
+                    border-left: 3px solid var(--primary-color);
+                }
+
+                .nav-section a:hover:not(.active), .logout-link:hover {
+                    background-color: #f8f9fa;
+                }
+
+        .logout-link {
+            color: #dc3545;
+        }
+
+        /* Main Content */
+        .admin-main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.75rem;
+            margin: 0 0 0.5rem;
+            font-weight: 600;
+        }
+
+        .header-title p {
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+            .search-box i {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-light);
+            }
+
+            .search-box input {
+                padding: 0.75rem 1rem 0.75rem 2.5rem;
+                border-radius: var(--border-radius);
+                border: 1px solid var(--border-color);
+                width: 250px;
+                font-size: 0.9rem;
+            }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: var(--danger-color);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Stats Overview */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            color: white;
+        }
+
+        .users-icon {
+            background-color: #4361ee;
+        }
+
+        .items-icon {
+            background-color: #3a0ca3;
+        }
+
+        .outfits-icon {
+            background-color: #7209b7;
+        }
+
+        .storage-icon {
+            background-color: #f72585;
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+            .stat-content h3 {
+                font-size: 1.5rem;
+                margin: 0 0 0.25rem;
+                font-weight: 700;
+            }
+
+            .stat-content p {
+                color: var(--text-light);
+                margin: 0;
+                font-size: 0.85rem;
+            }
+
+        .stat-change {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .positive {
+            color: var(--success-color);
+        }
+
+        .negative {
+            color: var(--danger-color);
+        }
+
+        .neutral {
+            color: var(--warning-color);
+        }
+
+        /* Admin Content */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -0.75rem;
+        }
+
+        .col-lg-8 {
+            flex: 0 0 66.666667%;
+            max-width: 66.666667%;
+            padding: 0 0.75rem;
+        }
+
+        .col-lg-4 {
+            flex: 0 0 33.333333%;
+            max-width: 33.333333%;
+            padding: 0 0.75rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            .card-header h2 {
+                font-size: 1.1rem;
+                margin: 0;
+                font-weight: 600;
+            }
+
+        .card-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .time-select {
+            padding: 0.4rem 0.75rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            background-color: white;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+            .chart-placeholder img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .table th {
+                padding: 0.75rem;
+                text-align: left;
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: var(--text-light);
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .table td {
+                padding: 0.75rem;
+                vertical-align: middle;
+                border-bottom: 1px solid var(--border-color);
+                font-size: 0.9rem;
+            }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+            .user-info img {
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .active {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+
+        .inactive {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: var(--text-light);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            color: var(--text-color);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+            .btn-icon:hover {
+                background-color: #e9ecef;
+            }
+
+            .btn-icon.delete {
+                color: var(--danger-color);
+            }
+
+        /* System Info */
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .info-label {
+            width: 100px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .progress {
+            flex: 1;
+            height: 8px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            margin: 0 1rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .percentage {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .system-details {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .detail-value {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            color: var(--success-color);
+        }
+
+        /* Quick Actions */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            color: var(--text-color);
+            transition: all 0.2s;
+        }
+
+            .action-item:hover {
+                background-color: #e9ecef;
+                transform: translateY(-2px);
+            }
+
+            .action-item i {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+                color: var(--primary-color);
+            }
+
+            .action-item span {
+                font-size: 0.85rem;
+                font-weight: 500;
+                text-align: center;
+            }
+
+        .view-all {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Altri script che potrebbero servire
+        });
+    </script>
+}

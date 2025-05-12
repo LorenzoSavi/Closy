@@ -1,0 +1,201 @@
+@page
+@model Closy.Pages.Wardrobe.DetailsModel
+@{
+    ViewData["Title"] = Model.ClothingItem?.Name ?? "Dettaglio capo";
+}
+
+<div class="container wardrobe-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="page-title">Dettaglio capo</h1>
+                    <p class="text-muted">Visualizza le informazioni di questo capo</p>
+                </div>
+                <div>
+                    <a href="@Url.Page("./AllItems")" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-arrow-left me-2"></i>Torna alla lista
+                    </a>
+                    <a href="@Url.Page("./Edit", new { id = Model.ClothingItem?.Id })" class="btn btn-primary">
+                        <i class="bi bi-pencil-fill me-2"></i>Modifica
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.ClothingItem != null)
+    {
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-0">
+                        @if (!string.IsNullOrEmpty(Model.ClothingItem.ImageUrl))
+                        {
+                            <img src="@Model.ClothingItem.ImageUrl" alt="@Model.ClothingItem.Name" class="img-fluid item-image w-100 h-100 object-fit-cover" />
+                        }
+                        else
+                        {
+                            <div class="placeholder-image" style="background-color: @Model.ClothingItem.Color">
+                                <i class="bi bi-question-circle"></i>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h3 class="card-title mb-4">@Model.ClothingItem.Name</h3>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <div class="detail-label">Categoria</div>
+                                    <div class="detail-value">@Model.ClothingItem.Category</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <div class="detail-label">Marca</div>
+                                    <div class="detail-value">
+                                        @(string.IsNullOrEmpty(Model.ClothingItem.Brand) ? "-" : Model.ClothingItem.Brand)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <div class="detail-label">Stagione</div>
+                                    <div class="detail-value">@Model.ClothingItem.Season</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <div class="detail-label">Colore</div>
+                                    <div class="detail-value">
+                                        <div class="d-flex align-items-center">
+                                            <div class="color-swatch me-2" style="background-color: @Model.ClothingItem.Color"></div>
+                                            @Model.ClothingItem.Color
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <div class="detail-label">Data di acquisto</div>
+                                    <div class="detail-value">
+                                        @(Model.ClothingItem.PurchaseDate.HasValue ? Model.ClothingItem.PurchaseDate.Value.ToString("dd/MM/yyyy") : "-")
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-item">
+                                    <div class="detail-label">Preferito</div>
+                                    <div class="detail-value">
+                                        @if (Model.ClothingItem.IsFavorite)
+                                        {
+                                            <span class="text-warning"><i class="bi bi-star-fill me-1"></i> Sì</span>
+                                        }
+                                        else
+                                        {
+                                            <span><i class="bi bi-star me-1"></i> No</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.ClothingItem.Notes))
+                        {
+                            <div class="mb-4">
+                                <h5>Note</h5>
+                                <p class="mb-0">@Model.ClothingItem.Notes</p>
+                            </div>
+                        }
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Aggiunto il @Model.ClothingItem.DateAdded.ToString("dd/MM/yyyy")</small>
+                            </div>
+                            <div>
+                                <form>
+                                    <a href="@Url.Page("./Delete", new { id = Model.ClothingItem.Id })" class="btn btn-outline-danger">
+                                        <i class="bi bi-trash3 me-1"></i>
+                                        Elimina
+                                    </a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Capo non trovato.
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .item-image {
+        border-radius: 8px;
+        object-fit: cover;
+        max-height: 400px;
+    }
+
+    .placeholder-image {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+
+    .placeholder-image i {
+        font-size: 3rem;
+        color: white;
+        opacity: 0.6;
+    }
+
+    .detail-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.2rem;
+    }
+
+    .detail-value {
+        font-weight: 500;
+    }
+
+    .color-swatch {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+</style>

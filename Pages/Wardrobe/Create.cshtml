@@ -1,0 +1,484 @@
+﻿@page
+@model Closy.Pages.Wardrobe.CreateModel
+@{
+    ViewData["Title"] = "Aggiungi Capo";
+}
+
+<div class="container py-4 fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header p-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-plus-circle-fill fs-3 me-3 text-primary"></i>
+                        <div class="pipo">
+                            <h4 class="mb-1">Aggiungi un nuovo capo</h4>
+                            <p class="mb-0 ">Inserisci i dettagli del tuo nuovo capo d'abbigliamento</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    @if (!ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+                            <div>
+                                <strong>Attenzione!</strong>
+                                <ul class="mb-0 mt-2">
+                                    @foreach (var modelState in ViewData.ModelState.Values)
+                                    {
+                                        foreach (var error in modelState.Errors)
+                                        {
+                                            <li>@error.ErrorMessage</li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <!-- Upload Section -->
+                        <div class="mb-4">
+                            <div class="upload-area position-relative rounded-3 p-4 text-center">
+
+                            <div class="upload-area position-relative rounded-3 bg-light p-4 text-center">
+                                <input type="file" id="imageInput" name="Image" class="d-none" accept="image/*" required />
+                                <div id="dropZone" class="border-2 border-dashed rounded-3 py-5 cursor-pointer">
+                                    <!-- Stack di icone per effetto 3D -->
+                                    <div class="icon-stack mb-3">
+                                        <i class="bi bi-image fs-1 text-primary"></i>
+                                        <i class="bi bi-cloud-arrow-up fs-3 text-secondary position-absolute top-0 end-0"></i>
+                                        <i class="bi bi-plus-circle-dotted fs-4 text-success position-absolute bottom-0 start-0"></i>
+                                    </div>
+                                    <h5 class="mb-2">
+                                        <i class="bi bi-hand-index me-2"></i>
+                                        Trascina un'immagine o clicca per selezionare
+                                    </h5>
+                                    <p class="text-muted mb-0">
+                                        <i class="bi bi-info-circle-fill me-1"></i>
+                                        Formati supportati: JPG, PNG - Max 5MB
+                                    </p>
+                                    <div class="mt-3">
+                                        <span class="badge bg-light text-dark me-2">
+                                            <i class="bi bi-image me-1"></i>JPG
+                                        </span>
+                                        <span class="badge bg-light text-dark me-2">
+                                            <i class="bi bi-file-earmark-image me-1"></i>PNG
+                                        </span>
+                                        <span class="badge bg-light text-dark">
+                                            <i class="bi bi-arrow-down-circle me-1"></i>5MB
+                                        </span>
+                                    </div>
+                                    <div id="imagePreview" class="mt-3 d-none position-relative">
+                                        <div class="position-absolute top-0 end-0 m-2">
+                                            <button type="button" class="btn btn-danger btn-sm rounded-circle" id="removeImage">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+                                        <img src="" class="img-thumbnail" style="max-height: 200px" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        <!-- Basic Info -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-tag me-2"></i>Nome del capo
+                                </label>
+                                <input asp-for="Input.Name" class="form-control" placeholder="es. T-shirt basic bianca" required />
+                                <div class="invalid-feedback">
+                                    Inserisci il nome del capo
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-briefcase me-2"></i>Marca
+                                </label>
+                                <input asp-for="Input.Brand" class="form-control" placeholder="es. Nike" required />
+                                <div class="invalid-feedback">
+                                    Inserisci la marca
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-folder me-2"></i>Categoria
+                                </label>
+                                <select asp-for="Input.Category" class="form-select" required>
+                                    <option value="">Seleziona categoria...</option>
+                                    <option value="Magliette">Magliette</option>
+                                    <option value="Pantaloni">Pantaloni</option>
+                                    <option value="Giacche">Giacche</option>
+                                    <option value="Scarpe">Scarpe</option>
+                                    <option value="Accessori">Accessori</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Seleziona una categoria
+                                </div>
+                            </div>
+
+                            <!-- Color Selection -->
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-palette me-2"></i>Colore
+                                </label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var color in new[] {
+                                    ("#000000", "Nero"), ("#FFFFFF", "Bianco"),
+                                    ("#0047AB", "Blu"), ("#DC3545", "Rosso"),
+                                    ("#28A745", "Verde"), ("#FFC107", "Giallo"),
+                                    ("#6A5ACD", "Viola"), ("#FF69B4", "Rosa"),
+                                    ("#A52A2A", "Marrone"), ("#808080", "Grigio")
+                                    })
+                                    {
+                                        <div class="color-option" data-color="@color.Item1" data-bs-toggle="tooltip" title="@color.Item2">
+                                            <input type="radio" name="Input.Color" value="@color.Item1" class="btn-check" id="color-@color.Item2" required />
+                                            <label class="btn btn-outline-secondary p-3 rounded-circle @(color.Item1 == "#FFFFFF" ? "border" : "")"
+                                                   for="color-@color.Item2"
+                                                   style="background-color: @color.Item1">
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Seasons -->
+                        <div class="mb-4">
+                            <label class="form-label d-block">
+                                <i class="bi bi-calendar4-week me-2"></i>Stagioni
+                            </label>
+                            <div class="row g-2">
+                                @foreach (var season in new[] {
+                                ("Primavera", new[] {"flower1", "cloud-sun", "droplet"}),
+                                ("Estate", new[] {"sun", "thermometer-high", "umbrella"}),
+                                ("Autunno", new[] {"tree", "cloud-rain", "wind"}),
+                                ("Inverno", new[] {"snow", "thermometer-low", "cloud-snow"})
+                                })
+                                {
+                                    <div class="col-6 col-md-3">
+                                        <input type="checkbox"
+                                               class="btn-check season-check"
+                                               name="seasons"
+                                               value="@season.Item1"
+                                               id="season-@season.Item1.ToLower()" />
+                                        <label class="btn btn-outline-primary w-100 season-btn p-3"
+                                               for="season-@season.Item1.ToLower()">
+                                            <div class="season-icons mb-2">
+                                                @foreach (var icon in season.Item2)
+                                                {
+                                                    <i class="bi bi-@icon"></i>
+                                                }
+                                            </div>
+                                            <span>@season.Item1</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="/Wardrobe/AllItems" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-2"></i>Annulla
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Salva capo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Inizializza i tooltip di Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+        // Drag and drop + preview immagine
+        const dropZone = document.getElementById('dropZone');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = imagePreview.querySelector('img');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropZone.classList.add('border-primary');
+        }
+
+        function unhighlight() {
+            dropZone.classList.remove('border-primary');
+        }
+
+        dropZone.addEventListener('click', () => imageInput.click());
+
+        dropZone.addEventListener('drop', handleDrop, false);
+        imageInput.addEventListener('change', handleFiles, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles({ target: { files: files } });
+        }
+
+        function handleFiles(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.remove('d-none');
+                    dropZone.classList.add('has-image');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Form validation
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+
+        document.getElementById('removeImage')?.addEventListener('click', function() {
+            imageInput.value = '';
+            imagePreview.classList.add('d-none');
+            dropZone.classList.remove('has-image');
+            previewImg.src = '';
+        });
+
+        // Effetto hover sulle icone delle stagioni
+        document.querySelectorAll('.season-btn').forEach(btn => {
+            btn.addEventListener('mouseover', function() {
+                this.querySelectorAll('.season-icons i').forEach((icon, index) => {
+                    setTimeout(() => {
+                        icon.style.transform = 'translateY(-5px)';
+                        setTimeout(() => {
+                            icon.style.transform = 'translateY(0)';
+                        }, 200);
+                    }, index * 100);
+                });
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .pipo{
+            color: #7B68EE;
+        }
+                .upload-area {
+            transition: all 0.3s ease;
+        }
+
+        .border-dashed {
+            border: 2px dashed var(--bs-gray-400);
+            transition: all 0.3s ease;
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .border-dashed:hover {
+            border-color: var(--primary-color);
+        }
+
+        .has-image .border-dashed {
+            border-style: solid;
+        }
+
+        .color-option {
+            position: relative;
+        }
+
+        .btn-check:checked + label {
+            transform: scale(1.1);
+            border: 2px solid var(--primary-color) !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn {
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .icon-stack {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto;
+        }
+
+            .icon-stack i {
+                transition: all 0.3s ease;
+            }
+
+        .border-dashed:hover .icon-stack i {
+            transform: scale(1.1);
+            color: var(--primary-color) !important;
+        }
+
+        /* Stili per le stagioni */
+        .season-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .season-icons {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .season-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .season-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+
+        .season-btn:hover::after {
+            transform: translateX(100%);
+        }
+
+        .btn-check:checked + .season-btn {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(var(--bs-primary-rgb), 0.3);
+        }
+
+            .btn-check:checked + .season-btn .season-icons i {
+                animation: bounce 0.5s;
+            }
+
+        @@keyframes bounce {
+            0%, 100%
+
+        {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-5px);
+        }
+
+        }
+
+        /* Animazione per rimozione immagine */
+        #removeImage {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+        }
+
+        #imagePreview:hover #removeImage {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .badge {
+            background-color: #F8F9FA !important;
+            color: #6c757d !important;
+            border: 1px solid #dee2e6;
+            padding: 0.5rem 1rem;
+        }
+
+        .season-btn {
+            background-color: #F8F9FA !important;
+            border: 1px solid #dee2e6 !important;
+        }
+
+            .season-btn:hover {
+                background-color: #e9ecef !important;
+                border-color: #7B68EE !important;
+            }
+
+        .btn-check:checked + .season-btn {
+            background-color: #7B68EE !important;
+            border-color: #7B68EE !important;
+            color: white !important;
+        }
+
+        .season-icons i {
+            color: #6c757d;
+        }
+
+        .btn-check:checked + .season-btn .season-icons i {
+            color: white;
+        }
+    </style>
+}

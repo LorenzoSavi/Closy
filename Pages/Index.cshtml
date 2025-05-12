@@ -1,0 +1,1791 @@
+﻿@page
+@model closy.Pages.IndexModel
+@{
+    Response.Redirect("/Wardrobe/AllItems");
+}
+
+<div class="wardrobe-container">
+    
+
+    <!-- Contenuto principale -->
+    <main class="wardrobe-main">
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["Message"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <header class="main-header">
+            <h1>Il mio guardaroba</h1>
+            <div class="header-actions">
+                <div class="search-container">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cerca nel guardaroba..." />
+                </div>
+                <button class="btn btn-primary add-item-btn" id="addItemBtn">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>Aggiungi capo</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Filtro Categorie -->
+        <div class="category-filter mb-4">
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-primary category-btn" data-category="">
+                    Tutti
+                </button>
+                @foreach (var category in Model.Categories)
+                {
+                    <button class="btn btn-outline-primary category-btn" data-category="@category">
+                        @category
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- Sezione AI per suggerimenti outfit -->
+        <section class="ai-section">
+            <div class="ai-card">
+                <div class="ai-header">
+                    <div>
+                        <h2>Suggerimenti AI</h2>
+                        <p>Ottenuti con Gemini AI in base al tuo guardaroba</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary refresh-btn" id="refreshAiBtn">
+                        <i class="bi bi-arrow-clockwise"></i> Aggiorna
+                    </button>
+                </div>
+                <div class="ai-content" id="aiContent">
+                    @if (Model.RecentItems.Count >= 4)
+                    {
+                        <div class="ai-outfit">
+                            <div class="outfit-suggestion">
+                                <h3>Outfit del giorno</h3>
+                                <div class="outfit-items">
+                                    @foreach (var item in Model.RecentItems.Take(4))
+                                    {
+                                        <div class="outfit-item">
+                                            <img src="@item.ImageUrl" alt="@item.Name" />
+                                            <span>@item.Name</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="ai-description">
+                                    <div class="ai-icon">
+                                        <i class="bi bi-robot"></i>
+                                    </div>
+                                    <div class="ai-text">
+                                        <p>Questo outfit casual è perfetto per una giornata in città. La combinazione di colori si armonizza bene e offre un look elegante ma confortevole.</p>
+                                        <small>Generato da Gemini AI</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ai-empty-state">
+                            <div class="ai-empty-icon">
+                                <i class="bi bi-layers"></i>
+                            </div>
+                            <h3>Aggiungi più capi per ricevere suggerimenti</h3>
+                            <p>Carica almeno 4 capi diversi nel tuo guardaroba per permettere all'AI di creare outfit personalizzati</p>
+                            <button class="btn btn-primary" id="aiAddItemsBtn">
+                                <i class="bi bi-plus-circle"></i> Aggiungi capi
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- Griglia dei capi d'abbigliamento -->
+        <section class="items-section">
+            <div class="section-header">
+                <h2>I tuoi capi</h2>
+                <div class="sort-options">
+                    <select id="sortSelect" class="form-select">
+                        <option value="newest">Più recenti</option>
+                        <option value="oldest">Più vecchi</option>
+                        <option value="name-asc">Nome (A-Z)</option>
+                        <option value="name-desc">Nome (Z-A)</option>
+                    </select>
+                    <button class="btn btn-secondary" id="viewAllItemsBtn">
+                        <i class="bi bi-grid-3x3-gap-fill"></i> Vedi tutti i capi
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.location.href='@Url.Page("/Wardrobe/Outfits")'">
+                        <i class="bi bi-collection"></i> Gestisci Outfit
+                    </button>
+                </div>
+            </div>
+            
+            @if (!Model.RecentItems.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-hanger"></i>
+                    </div>
+                    <h3>Il tuo guardaroba è vuoto</h3>
+                    <p>Inizia ad aggiungere i tuoi capi per vedere le statistiche e creare outfit</p>
+                    <button class="btn btn-primary" id="emptyAddItemBtn">
+                        <i class="bi bi-plus-circle"></i> Aggiungi il primo capo
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="clothing-grid" id="clothingGrid">
+                    @foreach (var item in Model.RecentItems)
+                    {
+                        <div class="clothing-card" 
+                             data-id="@item.Id" 
+                             data-name="@item.Name" 
+                             data-category="@item.Category"
+                             data-date="@item.Id">
+                            <div class="clothing-image">
+                                <img src="@item.ImageUrl" alt="@item.Name" />
+                                <button class="favorite-btn @(item.IsFavorite ? "favorited" : "")">
+                                    <i class="bi @(item.IsFavorite ? "bi-heart-fill" : "bi-heart")"></i>
+                                </button>
+                                <span class="category-badge">@item.Category</span>
+                                @if (!string.IsNullOrEmpty(item.Color))
+                                {
+                                    <span class="color-dot" style="background-color: @item.Color"></span>
+                                }
+                            </div>
+                            <div class="clothing-details">
+                                <h3>@item.Name</h3>
+                                <div class="clothing-actions">
+                                    <button class="btn btn-sm btn-outline-primary view-btn" data-id="@item.Id">
+                                        <i class="bi bi-eye"></i> Dettagli
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger delete-btn" data-id="@item.Id" data-name="@item.Name">
+                                        <i class="bi bi-trash"></i> Elimina
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    </main>
+</div>
+
+<!-- Modal Upload con RemoveBg -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Aggiungi un capo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="itemName" class="form-label">Nome del capo</label>
+                        <input type="text" class="form-control" id="itemName" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="itemCategory" class="form-label">Categoria</label>
+                        <select class="form-select" id="itemCategory" required>
+                            <option value="" selected disabled>Seleziona una categoria</option>
+                            <option value="Magliette">Magliette</option>
+                            <option value="Pantaloni">Pantaloni</option>
+                            <option value="Giacche">Giacche</option>
+                            <option value="Scarpe">Scarpe</option>
+                            <option value="Accessori">Accessori</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Immagine</label>
+                        <div class="upload-container" id="uploadContainer">
+                            <div class="upload-area" id="uploadArea">
+                                <i class="bi bi-cloud-arrow-up"></i>
+                                <p>Trascina qui l'immagine o clicca per selezionarla</p>
+                                <small class="text-muted">Formato: JPG, PNG. Max 5MB</small>
+                                <input type="file" id="itemImage" accept="image/*" class="d-none" required>
+                            </div>
+                            <div class="preview-area d-none" id="previewArea">
+                                <img id="imagePreview" src="#" alt="Anteprima">
+                                <div class="preview-controls">
+                                    <button type="button" class="btn btn-sm btn-light" id="changeImageBtn">
+                                        <i class="bi bi-arrow-repeat"></i> Cambia
+                                    </button>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="removeBackground" checked>
+                                        <label class="form-check-label" for="removeBackground">
+                                            Rimuovi sfondo (RemoveBg)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="aiDescription" class="form-label">
+                            <i class="bi bi-robot"></i> Descrivi questo capo con AI
+                        </label>
+                        <div class="ai-prompt-container">
+                            <textarea class="form-control" id="aiDescription" rows="3" placeholder="Descrivi il tuo capo oppure clicca 'Genera con AI'"></textarea>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="generateDescriptionBtn">
+                                <i class="bi bi-stars"></i> Genera con AI
+                            </button>
+                        </div>
+                        <small class="text-muted">La descrizione verrà utilizzata per creare outfit migliori</small>
+                    </div>
+                </form>
+                
+                <div class="upload-progress d-none" id="uploadProgress">
+                    <label>Elaborazione in corso...</label>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted" id="uploadStatus">Preparazione dell'immagine...</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                <button type="button" class="btn btn-primary" id="saveItemBtn">
+                    <i class="bi bi-save"></i> Salva
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal dettagli capo -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">Dettagli capo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="item-details-container">
+                    <div class="item-image">
+                        <img id="detailImage" src="" alt="">
+                        <span class="detail-category" id="detailCategory"></span>
+                    </div>
+                    <div class="item-info">
+                        <h3 id="detailName"></h3>
+                        
+                        <div class="item-metadata">
+                            <div class="metadata-item">
+                                <i class="bi bi-calendar3"></i>
+                                <span>Aggiunto il <span id="detailDate"></span></span>
+                            </div>
+                            <div class="metadata-item">
+                                <i class="bi bi-tag"></i>
+                                <span id="detailCategoryText"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-insights" id="aiInsights">
+                            <h4><i class="bi bi-stars"></i> Suggerimenti AI</h4>
+                            <div class="ai-content">
+                                <div class="ai-loading">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <span>Analisi con Gemini in corso...</span>
+                                </div>
+                                <div class="ai-result d-none" id="aiResult">
+                                    <!-- Contenuto generato da AI -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="button" class="btn btn-danger" id="detailDeleteBtn">
+                    <i class="bi bi-trash"></i> Elimina
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal di conferma eliminazione -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Conferma eliminazione</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <div>
+                        <p>Sei sicuro di voler eliminare <strong id="deleteItemName"></strong>?</p>
+                        <p class="text-danger">Questa azione non può essere annullata.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="bi bi-trash"></i> Elimina
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast di notifica -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1500">
+    <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-bell-fill me-2"></i>
+            <strong class="me-auto">Notifica</strong>
+            <small>Adesso</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Stili per la pagina guardaroba */
+        :root {
+            --primary-color: #6a5acd;
+            --secondary-color: #9370db;
+            --accent-color: #7b68ee;
+            --text-color: #333;
+            --text-light: #6c757d;
+            --light-color: #f8f9fa;
+            --border-color: #e0e0e0;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .wardrobe-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .wardrobe-sidebar {
+            width: 280px;
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 1rem;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info h3 {
+            font-size: 1rem;
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+        }
+
+        .user-info p {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+        }
+
+        .menu-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .menu-category h4 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 0.75rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            text-align: left;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .menu-item i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .menu-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .menu-item:hover:not(.active) {
+            background-color: #f5f5f5;
+        }
+
+        .logout-button {
+            color: #dc3545;
+        }
+
+        .logout-form {
+            margin: 0;
+            padding: 0;
+        }
+
+        .item-count {
+            margin-left: auto;
+            background-color: #f1f1f1;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: var(--text-color);
+        }
+
+        .new-badge {
+            margin-left: auto;
+            background-color: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        /* Main Content */
+        .wardrobe-main {
+            flex: 1;
+            padding: 2rem;
+            background-color: #f8f9fa;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .main-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container {
+            position: relative;
+            margin-right: 1rem;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .search-container input {
+            padding: 0.7rem 1rem 0.7rem 35px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            width: 250px;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-color);
+        }
+
+        /* Categorie */
+        .category-filter {
+            margin-bottom: 2rem;
+        }
+
+        .category-btn {
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        /* AI Section */
+        .ai-section {
+            margin-bottom: 2rem;
+        }
+
+        .ai-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        .ai-header {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ai-header h2 {
+            font-size: 1.25rem;
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+        }
+
+        .ai-header p {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .ai-content {
+            padding: 1.5rem;
+        }
+
+        .ai-outfit {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .outfit-suggestion {
+            flex: 1;
+        }
+
+        .outfit-suggestion h3 {
+            font-size: 1.1rem;
+            margin: 0 0 1rem 0;
+            font-weight: 600;
+        }
+
+        .outfit-items {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .outfit-item {
+            position: relative;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1/1;
+        }
+
+        .outfit-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .outfit-item span {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 0.5rem;
+            font-size: 0.75rem;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .ai-description {
+            display: flex;
+            gap: 1rem;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .ai-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .ai-text p {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .ai-text small {
+            color: var(--text-light);
+            font-size: 0.75rem;
+        }
+
+        .ai-empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .ai-empty-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .ai-empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-empty-state p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Items Section */
+        .items-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.25rem;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .sort-options select {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            background-color: white;
+        }
+
+        /* Clothing Grid */
+        .clothing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .clothing-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .clothing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .clothing-image {
+            position: relative;
+            height: 220px;
+            background-color: #f5f5f5;
+        }
+
+        .clothing-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 5;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .favorite-btn i {
+            color: #dc3545;
+            font-size: 1rem;
+        }
+
+        .favorite-btn.favorited {
+            background-color: #dc3545;
+        }
+
+        .favorite-btn.favorited i {
+            color: white;
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .color-dot {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .clothing-details {
+            padding: 1rem;
+        }
+
+        .clothing-details h3 {
+            font-size: 1rem;
+            margin: 0 0 0.75rem 0;
+            font-weight: 500;
+        }
+
+        .clothing-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Upload Modal */
+        .upload-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .upload-area {
+            padding: 2rem;
+            text-align: center;
+            border: 2px dashed #ced4da;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-area:hover {
+            background-color: #e9ecef;
+            border-color: var(--primary-color);
+        }
+
+        .upload-area i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .upload-area p {
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-area {
+            padding: 1rem;
+        }
+
+        .preview-area img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .preview-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-prompt-container {
+            position: relative;
+        }
+
+        .ai-prompt-container button {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+        }
+
+        .upload-progress {
+            margin-top: 1.5rem;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details Modal */
+        .item-details-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .item-image {
+            position: relative;
+            text-align: center;
+        }
+
+        .item-image img {
+            max-height: 300px;
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-category {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .item-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .item-metadata {
+            margin-bottom: 1.5rem;
+        }
+
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .ai-insights {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .ai-insights h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        /* Delete Modal */
+        .delete-warning {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .delete-warning i {
+            font-size: 2rem;
+            color: #dc3545;
+        }
+
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Elementi DOM principali
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        const clothingGrid = document.getElementById('clothingGrid');
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const emptyAddItemBtn = document.getElementById('emptyAddItemBtn');
+        const aiAddItemsBtn = document.getElementById('aiAddItemsBtn');
+        const refreshAiBtn = document.getElementById('refreshAiBtn');
+        
+        // Upload e form
+        const uploadModal = new bootstrap.Modal(document.getElementById('uploadModal'));
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadArea = document.getElementById('uploadArea');
+        const itemImage = document.getElementById('itemImage');
+        const previewArea = document.getElementById('previewArea');
+        const imagePreview = document.getElementById('imagePreview');
+        const changeImageBtn = document.getElementById('changeImageBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const saveItemBtn = document.getElementById('saveItemBtn');
+        const generateDescriptionBtn = document.getElementById('generateDescriptionBtn');
+        const aiDescription = document.getElementById('aiDescription');
+        
+        // Dettagli e eliminazione
+        const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const detailDeleteBtn = document.getElementById('detailDeleteBtn');
+        
+        // Notifiche
+        const toast = new bootstrap.Toast(document.getElementById('notificationToast'));
+        const toastMessage = document.getElementById('toastMessage');
+        
+        // Variabili globali
+        let currentItemId = null;
+        let currentCategory = '';
+        
+        // Inizializzazione
+        document.addEventListener('DOMContentLoaded', function() {
+            initEventListeners();
+            checkForNotifications();
+        });
+        
+        // Inizializza tutti gli event listener
+        function initEventListeners() {
+            // Pulsanti per aprire il modal di upload
+            if (addItemBtn) addItemBtn.addEventListener('click', openUploadModal);
+            if (emptyAddItemBtn) emptyAddItemBtn.addEventListener('click', openUploadModal);
+            if (aiAddItemsBtn) aiAddItemsBtn.addEventListener('click', openUploadModal);
+            
+            // Upload di immagini
+            uploadArea.addEventListener('click', triggerImageUpload);
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('drop', handleDrop);
+            itemImage.addEventListener('change', handleImageSelect);
+            changeImageBtn.addEventListener('click', resetImageUpload);
+            
+            // Salvataggio e generazione con AI
+            saveItemBtn.addEventListener('click', handleSaveItem);
+            generateDescriptionBtn.addEventListener('click', generateAIDescription);
+            
+            // Filtro per categoria
+            categoryButtons.forEach(btn => {
+                btn.addEventListener('click', () => filterByCategory(btn.dataset.category));
+            });
+            
+            // Ricerca
+            searchInput.addEventListener('input', handleSearch);
+            
+            // Ordinamento
+            sortSelect.addEventListener('change', handleSort);
+            
+            // Pulsanti di azione sui capi
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => viewItemDetails(btn.dataset.id));
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => showDeleteConfirmation(btn.dataset.id, btn.dataset.name));
+            });
+            
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    toggleFavorite(this);
+                });
+            });
+            
+            // Modal di eliminazione
+            confirmDeleteBtn.addEventListener('click', deleteItem);
+            
+            // Refresh AI
+            if (refreshAiBtn) refreshAiBtn.addEventListener('click', refreshAISuggestions);
+        }
+        
+        // Controlla se ci sono notifiche da mostrare
+        function checkForNotifications() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('success')) {
+                showToast('Operazione completata con successo!', 'success');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+        
+        // ===== GESTIONE UPLOAD =====
+        function openUploadModal() {
+            resetUploadForm();
+            uploadModal.show();
+        }
+        
+        function triggerImageUpload() {
+            itemImage.click();
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.add('active');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('active');
+            
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                itemImage.files = e.dataTransfer.files;
+                handleImageSelect({ target: { files: e.dataTransfer.files } });
+            }
+        }
+        
+        function handleImageSelect(e) {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                
+                // Controlla il tipo di file
+                if (!file.type.match('image.*')) {
+                    showToast('Puoi caricare solo immagini (JPG, PNG, GIF)', 'error');
+                    return;
+                }
+                
+                // Controlla dimensione file (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('L\'immagine è troppo grande! Massimo 5MB.', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    uploadArea.classList.add('d-none');
+                    previewArea.classList.remove('d-none');
+                    
+                    // Genera automaticamente una descrizione se l'immagine è stata caricata
+                    setTimeout(() => {
+                        if (aiDescription.value === '') {
+                            generateAIDescription();
+                        }
+                    }, 500);
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function resetImageUpload() {
+            itemImage.value = '';
+            previewArea.classList.add('d-none');
+            uploadArea.classList.remove('d-none');
+        }
+        
+        function resetUploadForm() {
+            uploadForm.reset();
+            resetImageUpload();
+            uploadProgress.classList.add('d-none');
+            document.querySelector('.progress-bar').style.width = '0%';
+            document.getElementById('uploadStatus').textContent = 'Preparazione dell\'immagine...';
+        }
+        
+        // Integrazione con RemoveBg per la rimozione dello sfondo
+        async function processImageWithRemoveBg(imageFile) {
+            // Mostro la progress bar
+            uploadProgress.classList.remove('d-none');
+            
+            try {
+                // Preparo i dati del form
+                const formData = new FormData();
+                formData.append('image_file', imageFile);
+                formData.append('size', 'auto');
+                
+                // Aggiorno la progress bar
+                document.querySelector('.progress-bar').style.width = '20%';
+                document.getElementById('uploadStatus').textContent = 'Connessione al servizio RemoveBg...';
+                
+                // Effettuo la chiamata all'API di RemoveBg (attraverso un endpoint interno per non esporre la chiave)
+                const response = await fetch('/api/RemoveBg/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                // Aggiorno la progress bar
+                document.querySelector('.progress-bar').style.width = '60%';
+                document.getElementById('uploadStatus').textContent = 'Elaborazione dell\'immagine...';
+                
+                if (!response.ok) {
+                    throw new Error('Errore durante l\'elaborazione dell\'immagine');
+                }
+                
+                const result = await response.blob();
+                
+                // Aggiorno la progress bar
+                document.querySelector('.progress-bar').style.width = '100%';
+                document.getElementById('uploadStatus').textContent = 'Rimozione sfondo completata!';
+                
+                // Converto in URL per la visualizzazione
+                return URL.createObjectURL(result);
+                
+            } catch (error) {
+                console.error('Errore RemoveBg:', error);
+                showToast('Errore durante la rimozione dello sfondo. Verrà usata l\'immagine originale.', 'error');
+                return null;
+            }
+        }
+        
+        // ===== GEMINI AI INTEGRATION =====
+        async function generateAIDescription() {
+            // Verifica se è stata caricata un'immagine
+            if (!itemImage.files || !itemImage.files[0]) {
+                showToast('Carica prima un\'immagine per generare la descrizione', 'error');
+                return;
+            }
+            
+            // Ottieni informazioni sul capo
+            const categoryValue = document.getElementById('itemCategory').value;
+            const nameValue = document.getElementById('itemName').value || 'questo capo';
+            
+            // Modifica il pulsante per mostrare il caricamento
+            generateDescriptionBtn.disabled = true;
+            generateDescriptionBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Generazione...';
+            
+            try {
+                // Prepara i dati per l'API di Gemini
+                const formData = new FormData();
+                formData.append('image', itemImage.files[0]);
+                formData.append('prompt', `Descrivi ${nameValue} (categoria: ${categoryValue || 'abbigliamento'}) in italiano, includendo il suo stile, occasioni d'uso e possibili abbinamenti. Descrizione breve ma dettagliata.`);
+                
+                // Chiamata all'API di Gemini (attraverso un endpoint interno)
+                const response = await fetch('/api/Gemini/generateFromImage', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Errore durante la generazione della descrizione');
+                }
+                
+                const data = await response.json();
+                
+                // Aggiorna il campo descrizione
+                aiDescription.value = data.text || 'Non è stato possibile generare una descrizione per questa immagine.';
+                
+            } catch (error) {
+                console.error('Errore Gemini:', error);
+                showToast('Errore durante la generazione della descrizione con AI', 'error');
+                aiDescription.value = 'Non è stato possibile generare una descrizione automatica.';
+            } finally {
+                // Ripristina il pulsante
+                generateDescriptionBtn.disabled = false;
+                generateDescriptionBtn.innerHTML = '<i class="bi bi-stars"></i> Genera con AI';
+            }
+        }
+        
+        async function refreshAISuggestions() {
+            refreshAiBtn.disabled = true;
+            refreshAiBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            
+            try {
+                // Simula il caricamento
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // In una implementazione reale, qui ci sarebbe la chiamata all'API di Gemini
+                
+                showToast('Suggerimenti AI aggiornati', 'success');
+            } catch (error) {
+                showToast('Errore durante l\'aggiornamento dei suggerimenti', 'error');
+            } finally {
+                refreshAiBtn.disabled = false;
+                refreshAiBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Aggiorna';
+            }
+        }
+        
+        // ===== SALVARE UN NUOVO CAPO =====
+        async function handleSaveItem() {
+            // Validazione base
+            if (!validateForm()) return;
+            
+            // Disabilita il pulsante durante il salvataggio
+            saveItemBtn.disabled = true;
+            saveItemBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Salvataggio...';
+            
+            try {
+                // Prepara i dati
+                const imageFile = itemImage.files[0];
+                const formData = new FormData();
+                
+                // Se è selezionata l'opzione per rimuovere lo sfondo
+                if (document.getElementById('removeBackground').checked) {
+                    const processedImageUrl = await processImageWithRemoveBg(imageFile);
+                    
+                    // Se l'elaborazione ha avuto successo, aggiungi l'immagine elaborata
+                    if (processedImageUrl) {
+                        // Converti l'URL in Blob
+                        const response = await fetch(processedImageUrl);
+                        const processedBlob = await response.blob();
+                        formData.append('image', processedBlob, 'processed_image.png');
+                    } else {
+                        // Usa l'immagine originale come fallback
+                        formData.append('image', imageFile);
+                    }
+                } else {
+                    // Usa l'immagine originale
+                    formData.append('image', imageFile);
+                }
+                
+                // Aggiungi gli altri dati del form
+                formData.append('name', document.getElementById('itemName').value);
+                formData.append('category', document.getElementById('itemCategory').value);
+                formData.append('description', aiDescription.value);
+                
+                // Invia i dati al server
+                const response = await fetch('/api/ClothingItems', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Errore durante il salvataggio del capo');
+                }
+                
+                // Successo!
+                showToast('Capo salvato con successo!', 'success');
+                uploadModal.hide();
+                
+                // Ricarica la pagina per mostrare il nuovo capo
+                window.location.href = '/?success=true';
+                
+            } catch (error) {
+                console.error('Errore:', error);
+                showToast('Si è verificato un errore durante il salvataggio', 'error');
+                
+                // Riabilita il pulsante
+                saveItemBtn.disabled = false;
+                saveItemBtn.innerHTML = '<i class="bi bi-save"></i> Salva';
+            }
+        }
+        
+        function validateForm() {
+            const nameValue = document.getElementById('itemName').value;
+            const categoryValue = document.getElementById('itemCategory').value;
+            const hasImage = itemImage.files && itemImage.files.length > 0;
+            
+            let isValid = true;
+            let errorMessage = '';
+            
+            if (!nameValue) {
+                errorMessage = 'Inserisci un nome per il capo';
+                isValid = false;
+            } else if (!categoryValue) {
+                errorMessage = 'Seleziona una categoria';
+                isValid = false;
+            } else if (!hasImage) {
+                errorMessage = 'Carica un\'immagine per il capo';
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                showToast(errorMessage, 'error');
+            }
+            
+            return isValid;
+        }
+        
+        // ===== DETTAGLI E ELIMINAZIONE =====
+        async function viewItemDetails(id) {
+            currentItemId = id;
+            
+            // Trova il capo corrispondente
+            const itemCard = document.querySelector(`.clothing-card[data-id="${id}"]`);
+            if (!itemCard) return;
+            
+            // Popola il modal con i dati del capo
+            const name = itemCard.dataset.name;
+            const category = itemCard.dataset.category;
+            const imgSrc = itemCard.querySelector('img').src;
+            
+            document.getElementById('detailName').textContent = name;
+            document.getElementById('detailCategory').textContent = category;
+            document.getElementById('detailCategoryText').textContent = category;
+            document.getElementById('detailImage').src = imgSrc;
+            document.getElementById('detailDate').textContent = '01/05/2025'; // Data di esempio
+            
+            // In una implementazione reale, qui ci sarebbe una chiamata all'API per ottenere i dettagli completi
+            
+            // Mostra il modal
+            detailsModal.show();
+            
+            // Prepara il pulsante di eliminazione
+            detailDeleteBtn.onclick = () => {
+                detailsModal.hide();
+                showDeleteConfirmation(id, name);
+            };
+            
+            // Genera analisi AI
+            generateAIInsights(id, category, imgSrc);
+        }
+        
+        async function generateAIInsights(id, category, imageUrl) {
+            const aiInsights = document.getElementById('aiInsights');
+            const aiLoading = aiInsights.querySelector('.ai-loading');
+            const aiResult = document.getElementById('aiResult');
+            
+            // Mostra il loader e nasconde eventuali risultati precedenti
+            aiLoading.classList.remove('d-none');
+            aiResult.classList.add('d-none');
+            
+            try {
+                // Simula il caricamento (in un'implementazione reale, qui ci sarebbe una chiamata all'API di Gemini)
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Contenuto di esempio (in un'implementazione reale, questo verrebbe dall'API)
+                let insights = '';
+                
+                if (category === 'Magliette') {
+                    insights = `
+                        <div class="ai-suggestion">
+                            <h5><i class="bi bi-palette"></i> Analisi dello stile</h5>
+                            <p>Questo capo ha uno stile casual e versatile. I colori neutri lo rendono facile da abbinare con vari pantaloni e accessori.</p>
+                        </div>
+                        <div class="ai-suggestion">
+                            <h5><i class="bi bi-people"></i> Occasioni d'uso</h5>
+                            <p>Perfetto per il tempo libero, uscite informali o come base per un outfit più strutturato. Adatto per primavera ed estate.</p>
+                        </div>
+                        <div class="ai-suggestion">
+                            <h5><i class="bi bi-stars"></i> Abbinamenti consigliati</h5>
+                            <ul>
+                                <li>Con jeans blu e sneakers bianche per un look casual</li>
+                                <li>Sotto una giacca di pelle per un outfit più grintoso</li>
+                                <li>Con pantaloni chino per un look smart casual</li>
+                            </ul>
+                        </div>
+                    `;
+                } else if (category === 'Pantaloni') {
+                    insights = `
+                        <div class="ai-suggestion">
+                            <h5><i class="bi bi-palette"></i> Analisi dello stile</h5>
+                            <p>Questi pantaloni hanno un taglio moderno e una vestibilità comoda. Il colore è versatile e si adatta a molte combinazioni.</p>
+                        </div>
+                        <div class="ai-suggestion">
+                            <h5><i class="bi bi-people"></i> Occasioni d'uso</h5>
+                            <p>Adatti per occasioni casual o semi-formali, a seconda di come vengono abbinati. Ideali per tutte le stagioni.</p>
+                        </div>
+                        <div class="ai-suggestion">
+                            <h5><i class="bi bi-stars"></i> Abbinamenti consigliati</h5>
+                            <ul>
+                                <li>Con una camicia oxford per un look elegante ma non troppo formale</li>
+                                <li>Con una t-shirt e sneakers per un outfit casual</li>
+                                <li>Con un maglione e stivaletti per l'autunno/inverno</li>
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    insights = `
+                        <div class="ai-suggestion">
+                            <h5><i class="bi bi-palette"></i> Analisi dello stile</h5>
+                            <p>Questo capo aggiunge carattere al tuo guardaroba con il suo design distintivo. È un pezzo di qualità che valorizza molti outfit.</p>
+                        </div>
+                        <div class="ai-suggestion">
+                            <h5><i class="bi bi-people"></i> Occasioni d'uso</h5>
+                            <p>Versatile, può essere utilizzato in diverse occasioni a seconda dello stile che vuoi ottenere. Si adatta bene a contesti informali.</p>
+                        </div>
+                        <div class="ai-suggestion">
+                                                    <h5><i class="bi bi-stars"></i> Abbinamenti consigliati</h5>
+                            <ul>
+                                <li>Con altri capi neutri per un look minimalista ed elegante</li>
+                                <li>Con pezzi colorati per far risaltare la tua personalità</li>
+                                <li>Con accessori coordinati per un outfit armonioso</li>
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                // Aggiorna il contenuto e visualizza il risultato
+                aiResult.innerHTML = insights;
+                aiLoading.classList.add('d-none');
+                aiResult.classList.remove('d-none');
+
+            } catch (error) {
+                console.error('Errore nell\'analisi AI:', error);
+
+                // Mostra un messaggio di errore
+                aiResult.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Non è stato possibile generare l'analisi AI per questo capo.
+                    </div>
+                `;
+                aiLoading.classList.add('d-none');
+                aiResult.classList.remove('d-none');
+            }
+        }
+
+        function showDeleteConfirmation(id, name) {
+            currentItemId = id;
+            document.getElementById('deleteItemName').textContent = name;
+            deleteModal.show();
+        }
+
+        async function deleteItem() {
+            if (!currentItemId) return;
+
+            // Disabilita il pulsante durante l'eliminazione
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Eliminazione...';
+
+            try {
+                // In una implementazione reale, qui ci sarebbe una chiamata all'API per eliminare il capo
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Simula il tempo di eliminazione
+
+                // Rimuovi il capo dalla UI con animazione
+                const itemCard = document.querySelector(`.clothing-card[data-id="${currentItemId}"]`);
+                if (itemCard) {
+                    itemCard.style.transition = 'all 0.5s ease';
+                    itemCard.style.opacity = '0';
+                    itemCard.style.transform = 'scale(0.8)';
+
+                    setTimeout(() => {
+                        itemCard.remove();
+
+                        // Se non ci sono più capi, mostra lo stato vuoto
+                        if (clothingGrid && clothingGrid.children.length === 0) {
+                            location.reload(); // Ricarica per mostrare lo stato vuoto
+                        }
+                    }, 500);
+                }
+
+                // Nascondi il modal e mostra un messaggio di successo
+                deleteModal.hide();
+                showToast('Capo eliminato con successo', 'success');
+
+            } catch (error) {
+                console.error('Errore durante l\'eliminazione:', error);
+                showToast('Errore durante l\'eliminazione del capo', 'error');
+            } finally {
+                // Riabilita il pulsante
+                confirmDeleteBtn.disabled = false;
+                confirmDeleteBtn.innerHTML = '<i class="bi bi-trash"></i> Elimina';
+            }
+        }
+
+        // ===== PREFERITI, RICERCA E FILTRI =====
+        function toggleFavorite(button) {
+            button.classList.toggle('favorited');
+
+            // Aggiorna l'icona
+            const icon = button.querySelector('i');
+            if (button.classList.contains('favorited')) {
+                icon.classList.remove('bi-heart');
+                icon.classList.add('bi-heart-fill');
+                showToast('Capo aggiunto ai preferiti', 'success');
+            } else {
+                icon.classList.remove('bi-heart-fill');
+                icon.classList.add('bi-heart');
+                showToast('Capo rimosso dai preferiti', 'success');
+            }
+
+            // In una implementazione reale, qui ci sarebbe una chiamata all'API per aggiornare lo stato del preferito
+            const itemId = button.closest('.clothing-card').dataset.id;
+            console.log(`Stato preferito cambiato per l'item ${itemId}`);
+        }
+
+        function filterByCategory(category) {
+            currentCategory = category;
+
+            // Aggiorna lo stato attivo dei pulsanti
+            categoryButtons.forEach(btn => {
+                if (btn.dataset.category === category) {
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-primary');
+                } else {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-outline-primary');
+                }
+            });
+
+            // Se non ci sono elementi, esci
+            if (!clothingGrid) return;
+
+            // Filtra gli elementi
+            const items = clothingGrid.querySelectorAll('.clothing-card');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                if (!category || item.dataset.category === category) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Se non ci sono elementi visibili, mostra un messaggio
+            if (visibleCount === 0 && items.length > 0) {
+                // Rimuovi eventuali messaggi precedenti
+                const oldMessage = clothingGrid.querySelector('.empty-category-message');
+                if (oldMessage) oldMessage.remove();
+
+                // Aggiungi il nuovo messaggio
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-category-message col-12';
+                emptyMessage.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        <h3>Nessun capo in questa categoria</h3>
+                        <p>Prova a selezionare un'altra categoria o aggiungi nuovi capi in questa categoria.</p>
+                        <button class="btn btn-primary" onclick="openUploadModal()">
+                            <i class="bi bi-plus-circle"></i> Aggiungi capo
+                        </button>
+                    </div>
+                `;
+                clothingGrid.appendChild(emptyMessage);
+            } else {
+                // Rimuovi eventuali messaggi
+                const oldMessage = clothingGrid.querySelector('.empty-category-message');
+                if (oldMessage) oldMessage.remove();
+            }
+        }
+
+        function handleSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            // Se non ci sono elementi o il termine è vuoto, esci
+            if (!clothingGrid || !searchTerm) {
+                // Ripristina la visualizzazione in base alla categoria corrente
+                filterByCategory(currentCategory);
+                return;
+            }
+
+            // Filtra gli elementi
+            const items = clothingGrid.querySelectorAll('.clothing-card');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const name = item.dataset.name.toLowerCase();
+                const category = item.dataset.category.toLowerCase();
+                const matchesSearch = name.includes(searchTerm) || category.includes(searchTerm);
+                const matchesCategory = !currentCategory || item.dataset.category === currentCategory;
+
+                if (matchesSearch && matchesCategory) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Se non ci sono elementi visibili, mostra un messaggio
+            if (visibleCount === 0 && items.length > 0) {
+                // Rimuovi eventuali messaggi precedenti
+                const oldMessage = clothingGrid.querySelector('.empty-search-message');
+                if (oldMessage) oldMessage.remove();
+
+                // Aggiungi il nuovo messaggio
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-search-message col-12';
+                emptyMessage.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        <h3>Nessun risultato trovato</h3>
+                        <p>Prova a modificare i termini di ricerca o filtra per una categoria diversa.</p>
+                        <button class="btn btn-outline-primary" onclick="resetSearch()">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reimposta ricerca
+                        </button>
+                    </div>
+                `;
+                clothingGrid.appendChild(emptyMessage);
+            } else {
+                // Rimuovi eventuali messaggi
+                const oldMessage = clothingGrid.querySelector('.empty-search-message');
+                if (oldMessage) oldMessage.remove();
+            }
+        }
+
+        function resetSearch() {
+            searchInput.value = '';
+            handleSearch();
+        }
+
+        function handleSort() {
+            const sortType = sortSelect.value;
+
+            // Se non ci sono elementi, esci
+            if (!clothingGrid) return;
+
+            // Ottieni tutti gli elementi e convertili in array per ordinarli
+            const items = Array.from(clothingGrid.querySelectorAll('.clothing-card'));
+
+            // Ordina gli elementi
+            items.sort((a, b) => {
+                switch (sortType) {
+                    case 'newest':
+                        return parseInt(b.dataset.date) - parseInt(a.dataset.date);
+                    case 'oldest':
+                        return parseInt(a.dataset.date) - parseInt(b.dataset.date);
+                    case 'name-asc':
+                        return a.dataset.name.localeCompare(b.dataset.name);
+                    case 'name-desc':
+                        return b.dataset.name.localeCompare(a.dataset.name);
+                    default:
+                        return 0;
+                }
+            });
+
+            // Rimuovi tutti gli elementi attuali
+            clothingGrid.innerHTML = '';
+
+            // Aggiungi gli elementi ordinati
+            items.forEach(item => {
+                clothingGrid.appendChild(item);
+            });
+
+            // Riapplica i filtri attuali
+            handleSearch();
+        }
+
+        // ===== UTILITY =====
+        function showToast(message, type = 'info') {
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Imposta il messaggio e lo stile
+            toastMessage.textContent = message;
+
+            // Rimuovi le classi precedenti
+            toastMessage.className = 'toast-body';
+
+            // Aggiungi la classe appropriata in base al tipo
+            switch (type) {
+                case 'success':
+                    toastMessage.classList.add('text-success');
+                    break;
+                case 'error':
+                    toastMessage.classList.add('text-danger');
+                    break;
+                case 'warning':
+                    toastMessage.classList.add('text-warning');
+                    break;
+                default:
+                    toastMessage.classList.add('text-info');
+            }
+
+            // Mostra il toast
+            toast.show();
+        }
+    </script>
+}
