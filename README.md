@@ -1,14 +1,42 @@
-# Closy - Il tuo Guardaroba Digitale
+# Closy - Il tuo guardaroba digitale
 
-Closy è un'applicazione web progettata per aiutarti a gestire il tuo guardaroba digitale in modo semplice ed efficiente. Grazie a Closy, puoi:
-
-- Tenere traccia dei tuoi capi d'abbigliamento.
-- Creare e salvare outfit personalizzati.
-- Esplorare il tuo guardaroba in modo organizzato.
-- Personalizzare l'interfaccia con un tema visivo unico.
-- **Amministrare utenti (per amministratori)**: Visualizzare e gestire gli utenti registrati.
+Closy è un'applicazione web progettata per gestire il tuo guardaroba digitale. Con Closy, puoi:
+- Tenere traccia di tutti i tuoi capi d'abbigliamento.
+- Creare outfit personalizzati combinando i tuoi capi.
+- Esplorare il tuo guardaroba in modo semplice e veloce.
+- Salvare i tuoi capi e outfit preferiti.
+- Personalizzare il tema visivo per un'esperienza utente unica.
 
 ---
+
+## Funzionalità principali
+
+### Dashboard
+La dashboard è il punto di partenza dopo l'accesso. Qui puoi vedere:
+- **I tuoi capi preferiti**: Una sezione dedicata ai capi che ami di più.
+- **I tuoi outfit preferiti**: Una panoramica degli outfit che hai salvato come preferiti.
+- **Azioni rapide**: Pulsanti per aggiungere un capo, creare un outfit o esplorare il guardaroba.
+
+![Dashboard](docs/images/dashboard.png)
+
+---
+
+### Gestione dei capi
+- **Tutti i capi**: Visualizza l'elenco completo dei tuoi capi d'abbigliamento.
+- **Aggiungi un capo**: Carica un nuovo capo al tuo guardaroba con foto, categoria e descrizione.
+
+![Tutti i capi](docs/images/garments.png)
+![Aggiungi capo](docs/images/add_garment.png)
+
+---
+
+### Creazione di outfit
+Crea outfit combinando i capi presenti nel tuo guardaroba:
+- **Selezione dei capi**: Scegli i capi che vuoi includere nell'outfit.
+- **Salvataggio**: Salva l'outfit per rivederlo e modificarlo in seguito.
+
+![Crea outfit](docs/images/create_outfit.png)
+
 
 ## Funzionalità Principali
 
