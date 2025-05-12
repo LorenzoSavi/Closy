@@ -17,8 +17,6 @@ La dashboard è il punto di partenza dopo l'accesso. Qui puoi vedere:
 - **I tuoi outfit preferiti**: Una panoramica degli outfit che hai salvato come preferiti.
 - **Azioni rapide**: Pulsanti per aggiungere un capo, creare un outfit o esplorare il guardaroba.
 
-![Dashboard](img/dashboard.png)
-
 ---
 
 ### Gestione dei capi
@@ -46,12 +44,6 @@ La dashboard fornisce una panoramica dei tuoi capi e outfit preferiti, con azion
 ### Gestione dei Capi
 - Visualizza tutti i capi del tuo guardaroba.
 - Aggiungi nuovi capi con foto, categorie e descrizioni.
-
-### Creazione degli Outfit
-Crea outfit combinando i tuoi capi e salvali per un utilizzo futuro.
-
-### Tema Personalizzabile
-Modifica il tema visivo dell'applicazione per adattarlo ai tuoi gusti.
 
 ### Gestione Utenti (Solo per Amministratori)
 Gli amministratori hanno accesso a una sezione dedicata per:
