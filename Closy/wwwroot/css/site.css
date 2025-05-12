@@ -1,7 +1,7 @@
 :root {
-    --primary-color: #6A5ACD;
-    --secondary-color: #9370DB;
-    --accent-color: #7B68EE;
+    --primary-color: #8A9A5B; /* Sage green instead of purple */
+    --secondary-color: #D2B48C; /* Tan/beige instead of lighter purple */
+    --accent-color: #556B2F; /* Darker olive green instead of medium purple */
     --background-color: #F8F9FC;
     --text-primary: #2B2D42;
     --text-secondary: #6C757D;
@@ -131,7 +131,7 @@ body {
     .btn-primary:hover {
         background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(106, 90, 205, 0.4);
+        box-shadow: 0 5px 15px rgba(138, 154, 91, 0.4);
     }
 
 .btn-secondary {
@@ -156,7 +156,7 @@ body {
 
     .form-control:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(106, 90, 205, 0.1);
+        box-shadow: 0 0 0 4px rgba(138, 154, 91, 0.1);
     }
 
 /* Animazioni per elementi */
@@ -336,8 +336,8 @@ body {
 
     .form-control:focus, .form-select:focus {
         background-color: #FFFFFF;
-        border-color: #7B68EE;
-        box-shadow: 0 0 0 0.25rem rgba(123, 104, 238, 0.25);
+        border-color: #556B2F;
+        box-shadow: 0 0 0 0.25rem rgba(85, 107, 47, 0.25);
     }
 
 .form-label {
@@ -346,7 +346,7 @@ body {
 }
 
 .btn-primary {
-    background: #7B68EE;
+    background: #556B2F;
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
@@ -355,9 +355,9 @@ body {
 }
 
     .btn-primary:hover {
-        background: #6A5ACD;
+        background: #8A9A5B;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(123, 104, 238, 0.2);
+        box-shadow: 0 4px 12px rgba(85, 107, 47, 0.2);
     }
 
 .upload-area {
@@ -370,14 +370,14 @@ body {
 }
 
     .upload-area:hover {
-        border-color: #7B68EE;
+        border-color: #556B2F;
     }
 
 .upload-icon {
     width: 64px;
     height: 64px;
     margin: 0 auto 1rem;
-    color: #7B68EE;
+    color: #556B2F;
 }
 
 .color-picker {
@@ -469,7 +469,7 @@ body {
 
 .btn-check:checked + .season-btn-shared {
     transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(123, 104, 238, 0.3) !important;
+    box-shadow: 0 6px 15px rgba(85, 107, 47, 0.3) !important;
     background-color: var(--accent-color) !important;
     border-color: var(--accent-color) !important;
     color: white !important; 
@@ -485,10 +485,10 @@ body {
 
 /* Modal glass effect adjustments */
 .modal-content.glass-effect {
-    background: rgba(106, 90, 205, 0.15);
+    background: rgba(138, 154, 91, 0.15);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(106, 90, 205, 0.25);
+    border: 1px solid rgba(138, 154, 91, 0.25);
 }
 
 .modal-content.glass-effect .form-label,

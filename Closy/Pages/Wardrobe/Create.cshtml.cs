@@ -25,9 +25,15 @@ namespace Closy.Pages.Wardrobe
         public int TotalItems { get; set; }
         public int SavedOutfits { get; set; }
         public int FavoriteItems { get; set; }
+        
+        [TempData]
+        public string StatusMessage { get; set; }
 
         [BindProperty]
         public InputModel Input { get; set; }
+        
+        [BindProperty]
+        public bool RemoveBackground { get; set; } = false;
 
         // Definizione della classe InputModel all'interno di CreateModel
         public class InputModel
@@ -115,9 +121,35 @@ namespace Closy.Pages.Wardrobe
                     return Page();
                 }
 
-                // Salva l'immagine
+                // Salva l'immagine originale
                 string originalImagePath = await _imageService.SaveImageAsync(Image);
                 _logger.LogInformation($"Immagine salvata in: {originalImagePath}");
+
+                // Se richiesto, rimuovi lo sfondo
+                string finalImagePath = originalImagePath;
+                if (RemoveBackground)
+                {
+                    try
+                    {
+                        var noBgPath = await _imageService.RemoveBackgroundAsync(originalImagePath);
+                        
+                        if (noBgPath != originalImagePath)
+                        {
+                            _logger.LogInformation("Rimozione sfondo completata con successo");
+                            finalImagePath = noBgPath;
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Rimozione sfondo fallita, uso immagine originale");
+                            StatusMessage = "Non è stato possibile rimuovere lo sfondo dell'immagine. Il capo è stato salvato con l'immagine originale.";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Errore durante la rimozione dello sfondo");
+                        StatusMessage = "Si è verificato un errore durante la rimozione dello sfondo. Il capo è stato salvato con l'immagine originale.";
+                    }
+                }
 
                 // Crea il nuovo capo
                 var clothingItem = new ClothingItem
@@ -127,7 +159,7 @@ namespace Closy.Pages.Wardrobe
                     Category = Input.Category,
                     Color = Input.Color,
                     UserId = CurrentUser.Id,
-                    ImageUrl = originalImagePath,
+                    ImageUrl = finalImagePath,
                     OriginalImageUrl = originalImagePath,
                     Seasons = string.Join(",", seasons),
                     CreatedAt = DateTime.UtcNow,
@@ -138,7 +170,10 @@ namespace Closy.Pages.Wardrobe
                 await _dbContext.ClothingItems.AddAsync(clothingItem);
                 await _dbContext.SaveChangesAsync();
 
-                TempData["Message"] = "Capo aggiunto con successo!";
+                if (string.IsNullOrEmpty(StatusMessage))
+                {
+                    TempData["Message"] = "Capo aggiunto con successo!";
+                }
                 return RedirectToPage("./AllItems");
             }
             catch (Exception ex)

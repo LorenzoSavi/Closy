@@ -38,6 +38,9 @@ builder.Services.AddScoped<IClothingItemService, ClothingItemService>();
 // Aggiungi HttpClient per GeminiService
 builder.Services.AddHttpClient<Closy.Services.IGeminiService, Closy.Services.GeminiService>();
 
+// Aggiungi HttpClient
+builder.Services.AddHttpClient();
+
 // Configura le Razor Pages
 builder.Services.AddRazorPages(options =>
 {
@@ -104,9 +107,6 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RegisteredUserPolicy", policy =>
         policy.RequireAuthenticatedUser());
 });
-
-// Registrazione base di HttpClient
-builder.Services.AddHttpClient();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

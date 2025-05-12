@@ -80,6 +80,22 @@
                                         <img src="" class="img-thumbnail" style="max-height: 200px" />
                                     </div>
                                 </div>
+                                
+                                <!-- Opzione per rimuovere lo sfondo -->
+                                <div class="bg-option-wrapper mt-3">
+                                    <div class="form-check form-switch d-flex align-items-center justify-content-center gap-2">
+                                        <input class="form-check-input" type="checkbox" id="removeBackgroundToggle" asp-for="RemoveBackground" />
+                                        <label class="form-check-label" for="removeBackgroundToggle">
+                                            <span class="badge bg-info text-white">
+                                                <i class="bi bi-magic me-1"></i> Rimuovi sfondo automaticamente
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div id="bgRemovalInfo" class="mt-2 small text-muted">
+                                        <i class="bi bi-info-circle-fill me-1"></i>
+                                        Questa funzionalità utilizza l'AI per isolare automaticamente il capo d'abbigliamento dallo sfondo.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -188,7 +204,7 @@
                             <a href="/Wardrobe/AllItems" class="btn btn-outline-secondary">
                                 <i class="bi bi-x-lg me-2"></i>Annulla
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="saveButton">
                                 <i class="bi bi-check-lg me-2"></i>Salva capo
                             </button>
                         </div>
@@ -298,6 +314,29 @@
                 });
             });
         });
+
+        // Toggle per l'opzione rimozione sfondo
+        document.getElementById('removeBackgroundToggle').addEventListener('change', function() {
+            const saveBtn = document.getElementById('saveButton');
+            const bgInfo = document.getElementById('bgRemovalInfo');
+            
+            if (this.checked) {
+                saveBtn.innerHTML = '<i class="bi bi-magic me-2"></i>Salva capo (con rimozione sfondo)';
+                bgInfo.innerHTML = '<i class="bi bi-hourglass-split me-1 text-info"></i> La rimozione dello sfondo potrebbe richiedere qualche secondo.';
+            } else {
+                saveBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Salva capo';
+                bgInfo.innerHTML = '<i class="bi bi-info-circle-fill me-1"></i> Questa funzionalità utilizza l\'AI per isolare automaticamente il capo d\'abbigliamento dallo sfondo.';
+            }
+        });
+        
+        // Aggiungi animazione al pulsante Salva quando si attiva la rimozione sfondo
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (document.getElementById('removeBackgroundToggle').checked) {
+                const saveBtn = document.getElementById('saveButton');
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Elaborazione in corso...';
+            }
+        });
     </script>
 }
 
@@ -306,7 +345,7 @@
         .pipo{
             color: #7B68EE;
         }
-                .upload-area {
+        .upload-area {
             transition: all 0.3s ease;
         }
 
@@ -320,7 +359,7 @@
         }
 
         .border-dashed:hover {
-            border-color: var(--primary-color);
+            border-color: var(--primary-color); /* Now will use sage green */
         }
 
         .has-image .border-dashed {
@@ -479,6 +518,52 @@
 
         .btn-check:checked + .season-btn .season-icons i {
             color: white;
+        }
+
+        /* Stile per l'opzione rimozione sfondo */
+        .bg-option-wrapper {
+            border-top: 1px dashed #dee2e6;
+            padding-top: 15px;
+        }
+        
+        .form-check-input {
+            cursor: pointer;
+            width: 3rem;
+            height: 1.5rem;
+        }
+        
+        .form-switch .form-check-input:checked {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+        
+        #bgRemovalInfo {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        @@keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .bg-info {
+            background-color: #17a2b8 !important;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+        
+        /* Animazione per lo spinner del pulsante Salva */
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .spinner-border {
+            width: 1.2rem;
+            height: 1.2rem;
+            border-width: 0.2em;
         }
     </style>
 }
