@@ -1,0 +1,481 @@
+﻿@page
+@model Closy.Pages.Wardrobe.AllItemsModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@{
+    ViewData["Title"] = "Il mio guardaroba";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="wardrobe-container">
+    <main class="wardrobe-main">
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["Message"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <header class="main-header">
+            <h1>Il mio guardaroba</h1>
+            <div class="header-actions">
+                <div class="search-container">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cerca nel guardaroba..." />
+                </div>
+                <a href="/Wardrobe/Create" class="btn btn-primary add-item-btn">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>Aggiungi capo</span>
+                </a>
+            </div>
+        </header>
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["Message"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="filters-section">
+            <div class="filter-header" id="filtersToggle">
+                <span><i class="bi bi-funnel"></i> Filtri</span>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="filter-content" id="filtersContent">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Categorie</label>
+                        <div class="filter-options">
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="category-magliette" value="Magliette">
+                                <label for="category-magliette">Magliette</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="category-pantaloni" value="Pantaloni">
+                                <label for="category-pantaloni">Pantaloni</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="category-giacche" value="Giacche">
+                                <label for="category-giacche">Giacche</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="category-scarpe" value="Scarpe">
+                                <label for="category-scarpe">Scarpe</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="category-accessori" value="Accessori">
+                                <label for="category-accessori">Accessori</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Stagioni</label>
+                        <div class="filter-options">
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="season-primavera" value="Primavera">
+                                <label for="season-primavera">Primavera</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="season-estate" value="Estate">
+                                <label for="season-estate">Estate</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="season-autunno" value="Autunno">
+                                <label for="season-autunno">Autunno</label>
+                            </div>
+                            <div class="filter-checkbox">
+                                <input type="checkbox" id="season-inverno" value="Inverno">
+                                <label for="season-inverno">Inverno</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="items-grid">
+            @if (!Model.ClothingItems.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-hanger"></i>
+                    </div>
+                    <h3>Il tuo guardaroba è vuoto</h3>
+                    <p>Inizia ad aggiungere i tuoi capi per organizzare il tuo guardaroba</p>
+                    <a href="/Wardrobe/Create" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        Aggiungi il primo capo
+                    </a>
+                </div>
+            }
+            else
+            {
+                @foreach (var item in Model.ClothingItems)
+                {
+                    <div class="item-card"
+                         data-category="@item.Category"
+                         data-seasons="@item.Seasons"
+                         data-name="@item.Name"
+                         data-brand="@item.Brand">
+                        <div class="item-image">
+                            <img src="@item.ImageUrl" alt="@item.Name" loading="lazy">
+                            <div class="item-overlay">
+                                <button class="btn btn-light btn-sm delete-item" data-id="@item.Id">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="item-info">
+                            <h3>@item.Name</h3>
+                            <p class="item-brand">@item.Brand</p>
+                            <div class="item-meta">
+                                <span class="item-category">@item.Category</span>
+                                <span class="item-color" style="background-color: @item.Color"></span>
+                            </div>
+                            <div class="item-seasons">
+                                @foreach (var season in item.Seasons.Split(','))
+                                {
+                                    <span class="season-tag">@season</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </main>
+</div>
+
+<style>
+    .wardrobe-main {
+        padding: 2rem;
+        background-color: #f8f9fa;
+    }
+
+    .main-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .search-container {
+        position: relative;
+    }
+
+    .search-container i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .search-container input {
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        width: 300px;
+    }
+
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Ridotto da 250px a 200px */
+        gap: 1rem; /* Ridotto da 1.5rem a 1rem */
+        margin-top: 2rem;
+    }
+
+    .item-card {
+        background: white;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+    .item-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .item-image {
+        position: relative;
+        padding-top: 100%;
+    }
+
+        .item-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Cambiato da 'cover' a 'contain' */
+            padding: 0.5rem; /* Aggiunto padding per evitare che l'immagine tocchi i bordi */
+            background-color: #f8f9fa; /* Aggiunto sfondo chiaro */
+        }
+
+    .item-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .item-card:hover .item-overlay {
+        opacity: 1;
+    }
+
+    .item-info {
+        padding: 0.75rem;
+    }
+
+    .item-info h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .item-brand {
+        color: #6c757d;
+        font-size: 0.8rem;
+        margin: 0.25rem 0;
+    }
+
+    .item-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+
+    .item-category {
+        background: #e9ecef;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.8rem;
+    }
+
+    .item-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px #dee2e6;
+    }
+
+    .item-seasons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+    }
+
+    .season-tag {
+        background: #f8f9fa;
+        padding: 0.2rem 0.4rem; /* Ridotto il padding */
+        border-radius: 0.25rem;
+        font-size: 0.75rem; /* Ridotto da 0.8rem a 0.75rem */
+        color: #6c757d;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .filters-section {
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .filter-header {
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .filter-content {
+        padding: 1rem;
+        border-top: 1px solid #dee2e6;
+        display: none;
+    }
+
+    .filter-content.show {
+        display: block;
+    }
+
+    .filter-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .filter-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .filter-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .header-actions {
+            flex-direction: column;
+        }
+
+        .search-container {
+            width: 100%;
+        }
+
+        .search-container input {
+            width: 100%;
+        }
+
+        .items-grid {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* Ridotto ulteriormente per mobile */
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Toggle filtri
+        document.getElementById('filtersToggle').addEventListener('click', function() {
+            document.getElementById('filtersContent').classList.toggle('show');
+            this.querySelector('i:last-child').classList.toggle('bi-chevron-up');
+        });
+
+        // Ricerca
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const items = document.querySelectorAll('.item-card');
+
+            items.forEach(item => {
+                const name = item.dataset.name.toLowerCase();
+                const brand = item.dataset.brand.toLowerCase();
+                const matches = name.includes(searchTerm) || brand.includes(searchTerm);
+                item.style.display = matches ? '' : 'none';
+            });
+        });
+
+        // Filtri
+        function applyFilters() {
+            const selectedCategories = Array.from(document.querySelectorAll('input[id^="category-"]:checked'))
+                .map(cb => cb.value);
+
+            const selectedSeasons = Array.from(document.querySelectorAll('input[id^="season-"]:checked'))
+                .map(cb => cb.value);
+
+            const items = document.querySelectorAll('.item-card');
+
+            items.forEach(item => {
+                const categoryMatch = selectedCategories.length === 0 ||
+                                    selectedCategories.includes(item.dataset.category);
+
+                const seasons = item.dataset.seasons.split(',');
+                const seasonMatch = selectedSeasons.length === 0 ||
+                                  selectedSeasons.some(s => seasons.includes(s));
+
+                item.style.display = categoryMatch && seasonMatch ? '' : 'none';
+            });
+        }
+
+        // Aggiungi event listener per i filtri
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', applyFilters);
+        });
+
+        // Gestione delle azioni sui capi
+        document.querySelectorAll('.delete-item').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                if (confirm('Sei sicuro di voler eliminare questo capo?')) {
+                    const id = this.dataset.id;
+                    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                    const token = tokenInput ? tokenInput.value : null;
+
+                    if (!token) {
+                        alert('Errore di sicurezza: token non trovato.');
+                        console.error('CSRF token not found.');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/Wardrobe/AllItems?handler=Delete&id=${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'RequestVerificationToken': token
+                            }
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.success) {
+                            this.closest('.item-card').remove();
+                            // alert(result.message); // Opzionale: mostra messaggio di successo
+                        } else {
+                            alert(result.message || 'Errore durante l\'eliminazione del capo');
+                        }
+                    } catch (error) {
+                        console.error('Errore:', error);
+                        alert('Errore di comunicazione durante l\'eliminazione del capo.');
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.edit-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                window.location.href = `/Wardrobe/Edit/${id}`;
+            });
+        });
+
+        document.querySelectorAll('.view-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                window.location.href = `/Wardrobe/Details/${id}`;
+            });
+        });
+    </script>
+}

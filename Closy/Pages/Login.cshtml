@@ -1,0 +1,460 @@
+﻿@page
+@model closy.Pages.LoginModel
+@{
+    ViewData["Title"] = "Accesso";
+    ViewData["BodyClass"] = "auth-page";
+    Layout = "_LayoutNoSidebar";
+
+}
+
+<div class="register-container">
+    <!-- Sezione visuale/illustrativa -->
+    <div class="register-visual" style="background-image: url('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80')">
+        <div class="visual-content">
+            <div class="brand-logo">
+                <i class="bi bi-handbag"></i>
+                <span>Closy</span>
+            </div>
+
+            <div class="slogan">
+                <h2>Il tuo guardaroba intelligente ti aspetta</h2>
+                <p>Organizza, combina e scopri nuovi outfit con l'aiuto dell'intelligenza artificiale</p>
+            </div>
+
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-collection"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Cataloga il tuo stile</h3>
+                        <p>Importa e organizza tutti i tuoi capi in un guardaroba virtuale accessibile ovunque</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-layers"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Crea outfit perfetti</h3>
+                        <p>Combina facilmente i tuoi capi e salva le tue combinazioni preferite</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Suggerimenti AI</h3>
+                        <p>Ricevi consigli personalizzati sul tuo stile grazie all'intelligenza artificiale</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visual-footer">
+                <p>"La moda passa, lo stile resta." — Coco Chanel</p>
+            </div>
+        </div>
+
+        <div class="visual-overlay"></div>
+    </div>
+
+    <!-- Form di login -->
+    <div class="register-form-container">
+        <div class="form-header">
+            <div class="mobile-logo">
+                <i class="bi bi-handbag"></i>
+                <span>Closy</span>
+            </div>
+            <h1>Accedi</h1>
+            <p>Bentornato nel tuo armadio virtuale personale</p>
+        </div>
+
+        <form id="loginForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="register-form needs-validation" novalidate>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="form-group">
+                <label asp-for="Input.Email">
+                    <i class="bi bi-envelope"></i> Email
+                </label>
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="nome@esempio.com" />
+                <span asp-validation-for="Input.Email" class="invalid-feedback"></span>
+            </div>
+
+            <div class="form-group password-group">
+                <label asp-for="Input.Password">
+                    <i class="bi bi-lock"></i> Password
+                </label>
+                <div class="input-with-icon">
+                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="La tua password" />
+                    <button type="button" class="toggle-password" tabindex="-1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="Input.Password" class="invalid-feedback"></span>
+            </div>
+
+            <div class="form-group">
+                <button id="loginSubmit" type="submit" class="btn btn-primary btn-register">
+                    <span>Accedi</span>
+                    <i class="bi bi-arrow-right-circle"></i>
+                </button>
+            </div>
+
+            <div class="login-divider my-4">
+                <span>Oppure</span>
+            </div>
+
+            <div class="alternative-actions">
+                <p>Non hai un account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="accent-link">Registrati</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #6a5acd;
+        --primary-dark: #5a4abf;
+        --primary-light: #8474e5;
+        --secondary-color: #9370db;
+        --accent-color: #7b68ee;
+        --text-color: #333;
+        --text-light: #6c757d;
+        --text-dark: #212529;
+        --light-color: #f8f9fa;
+        --border-color: #e0e0e0;
+        --border-radius: 10px;
+        --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Layout Base */
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: white;
+    }
+
+    .register-container {
+        display: flex;
+        min-height: 100vh;
+        width: 100%;
+    }
+
+    /* Sezione Visual */
+    .register-visual {
+        flex: 1.2; /* Changed from 1.2 */
+        position: relative;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        padding: 3rem;
+    }
+
+    .visual-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(106, 90, 205, 0.9) 0%, rgba(147, 112, 219, 0.8) 100%);
+        z-index: 1;
+    }
+
+    .visual-content {
+        position: relative;
+        z-index: 2;
+        max-width: 600px;
+    }
+
+    /* Brand e Slogan */
+    .brand-logo {
+        display: flex;
+        align-items: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+    }
+
+        .brand-logo i {
+            margin-right: 1rem;
+            font-size: 2.5rem;
+        }
+
+    .slogan {
+        margin-bottom: 3rem;
+    }
+
+        .slogan h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .slogan p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+    /* Features */
+    .features {
+        margin-bottom: 3rem;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+
+    .feature-icon {
+        width: 48px;
+        height: 48px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1.5rem;
+        font-size: 1.5rem;
+    }
+
+    .feature-text h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .feature-text p {
+        font-size: 0.95rem;
+        opacity: 0.8;
+        line-height: 1.5;
+    }
+
+    /* Form Section */
+    .register-form-container {
+        flex: 0.8.8; /* Changed from 1 */
+        padding: 3rem; /* Reduced from 3rem */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background-color: white;
+        overflow-y: auto;
+    }
+
+    .form-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+        .form-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+    /* Form Elements */
+    .register-form {
+        max-width: 500px; /* Increased from 700px */
+        margin: 0 auto;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            min-width: 150px;
+        }
+
+            .form-group label i {
+                margin-right: 0.75rem;
+                font-size: 1.1rem;
+                color: var(--primary-color);
+            }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        background-color: var(--light-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+        .form-control:focus {
+            background-color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(106, 90, 205, 0.15);
+        }
+
+    /* Password Toggle */
+    .input-with-icon {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-light);
+        cursor: pointer;
+        padding: 0;
+    }
+
+    /* Button */
+    .btn-register {
+        width: 100%;
+        background-color: var(--primary-color);
+        border: none;
+        color: white;
+        padding: 0.9rem 1.5rem;
+        font-size: 1.1rem;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(106, 90, 205, 0.3);
+    }
+
+        .btn-register:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(106, 90, 205, 0.4);
+        }
+
+    /* Links */
+    .alternative-actions {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: var(--text-light);
+    }
+
+    .accent-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+        .accent-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+    /* Divider */
+    .login-divider {
+        text-align: center;
+        position: relative;
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+
+    .login-divider span {
+        background-color: white;
+        padding: 0 1rem;
+    }
+
+    .login-divider::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: var(--border-color);
+        z-index: -1;
+    }
+
+    /* Mobile Responsive */
+    @@media (max-width: 768px) {
+        .register-container
+
+    {
+        flex-direction: column;
+    }
+
+    .register-visual {
+        display: none;
+    }
+
+    .register-form-container {
+        padding: 2rem;
+    }
+
+    .mobile-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+    }
+
+        .mobile-logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+        }
+
+    }
+</style>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            const togglePasswordButton = document.querySelector('.toggle-password');
+            togglePasswordButton.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('input');
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+
+                // Toggle icon
+                const icon = this.querySelector('i');
+                icon.classList.toggle('bi-eye');
+                icon.classList.toggle('bi-eye-slash');
+            });
+
+            // Form animation
+            const formElements = document.querySelectorAll('.register-form .form-group');
+            formElements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                element.style.transition = `opacity 0.5s ease, transform 0.5s ease`;
+
+                setTimeout(() => {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, 100 + (index * 100));
+            });
+        });
+    </script>
+}

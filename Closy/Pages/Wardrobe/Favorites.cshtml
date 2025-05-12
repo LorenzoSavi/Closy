@@ -1,0 +1,535 @@
+﻿@page
+@model Closy.Pages.Wardrobe.FavoritesModel
+@{
+    ViewData["Title"] = "Preferiti";
+}
+
+<div class="favorites-container">
+    <header class="page-header">
+        <div class="header-content">
+            <h1>I tuoi Preferiti</h1>
+            <p class="header-description">I capi che ami di più, tutti in un posto</p>
+        </div>
+        <div class="header-actions">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchInput" placeholder="Cerca tra i preferiti..." />
+            </div>
+        </div>
+    </header>
+
+    <div class="favorites-content">
+        <!-- Sezione statistiche -->
+        <aside class="stats-sidebar">
+            <div class="stats-card">
+                <div class="stats-header">
+                    <h3>Le tue statistiche</h3>
+                    <i class="bi bi-heart-fill"></i>
+                </div>
+                <div class="stats-body">
+                    <div class="stat-item">
+                        <span class="stat-value">@Model.FavoriteItems</span>
+                        <span class="stat-label">Capi preferiti</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@(Model.FavoriteItems > 0 ? Math.Round((double)Model.FavoriteItems / Model.TotalItems * 100) : 0)%</span>
+                        <span class="stat-label">Del guardaroba</span>
+                    </div>
+                </div>
+                
+                <div class="category-distribution">
+                    <h4>Distribuzione</h4>
+                    @foreach (var category in Model.CategoryDistribution)
+                    {
+                        <div class="distribution-item">
+                            <div class="distribution-label">@category.Key</div>
+                            <div class="distribution-bar-container">
+                                <div class="distribution-bar" style="width: @(category.Value)%"></div>
+                                <span class="distribution-value">@category.Value%</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (Model.FavoriteItems >= 3)
+            {
+                <div class="ai-suggestions">
+                    <div class="suggestions-header">
+                        <h3>Suggerimenti AI</h3>
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div class="suggestions-content">
+                        <p>Outfit suggerito dai tuoi preferiti:</p>
+                        <div class="suggested-outfit">
+                            @foreach (var item in Model.ClothingItems.Take(3))
+                            {
+                                <div class="outfit-item">
+                                    <img src="@item.ImageUrl" alt="@item.Name" />
+                                </div>
+                            }
+                        </div>
+                        <button class="btn-secondary">
+                            <i class="bi bi-magic"></i>
+                            Salva come outfit
+                        </button>
+                    </div>
+                </div>
+            }
+        </aside>
+
+        <!-- Griglia dei preferiti -->
+        <div class="favorites-main">
+            <!-- Filtri categoria -->
+            <div class="category-filters">
+                <button class="filter-btn active" data-category="all">Tutti</button>
+                @foreach (var category in Model.Categories)
+                {
+                    <button class="filter-btn" data-category="@category">@category</button>
+                }
+            </div>
+
+            @if (!Model.ClothingItems.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-heart"></i>
+                    </div>
+                    <h2>Nessun capo preferito</h2>
+                    <p>Aggiungi i tuoi capi preferiti cliccando sull'icona del cuore</p>
+                    <a href="/Wardrobe/AllItems" class="btn-primary">
+                        <i class="bi bi-grid"></i>
+                        Vai al guardaroba
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="favorites-grid">
+                    @foreach (var item in Model.ClothingItems)
+                    {
+                        <div class="favorite-card" data-category="@item.Category">
+                            <div class="favorite-image">
+                                <img src="@item.ImageUrl" alt="@item.Name" loading="lazy" />
+                                <button class="favorite-btn" data-id="@item.Id">
+                                    <i class="bi bi-heart-fill"></i>
+                                </button>
+                                <span class="category-tag">@item.Category</span>
+                            </div>
+                            <div class="favorite-info">
+                                <h3>@item.Name</h3>
+                                <p class="brand">@item.Brand</p>
+                                <div class="color-indicator" style="background-color: @item.Color"></div>
+                            </div>
+                            <div class="favorite-actions">
+                                <button class="btn-icon" onclick="viewDetails(@item.Id)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn-icon" onclick="removeFavorite(@item.Id)">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .favorites-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .search-box {
+        position: relative;
+        width: 300px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        background: white;
+        font-size: 0.95rem;
+    }
+
+    .favorites-content {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+    }
+
+    /* Sidebar statistiche */
+    .stats-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .stats-card, .ai-suggestions {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .stats-header, .suggestions-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .stats-header h3, .suggestions-header h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .stats-body {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    /* Distribuzione categorie */
+    .category-distribution {
+        margin-top: 1.5rem;
+    }
+
+    .category-distribution h4 {
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+    }
+
+    .distribution-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .distribution-label {
+        flex: 0 0 80px;
+        font-size: 0.9rem;
+    }
+
+    .distribution-bar-container {
+        flex: 1;
+        height: 6px;
+        background: var(--background-color);
+        border-radius: 3px;
+        position: relative;
+    }
+
+    .distribution-bar {
+        height: 100%;
+        background: var(--primary-color);
+        border-radius: 3px;
+        transition: width 0.3s ease;
+    }
+
+    .distribution-value {
+        position: absolute;
+        right: 0;
+        top: -18px;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    /* Suggerimenti AI */
+    .suggested-outfit {
+        display: flex;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .outfit-item {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .outfit-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Filtri categoria */
+    .category-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        background: white;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .filter-btn:hover {
+        background: var(--background-color);
+    }
+
+    .filter-btn.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    /* Griglia preferiti */
+    .favorites-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .favorite-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+    }
+
+    .favorite-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .favorite-image {
+        position: relative;
+        aspect-ratio: 1;
+    }
+
+    .favorite-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .favorite-btn {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--danger-color);
+        border: none;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .favorite-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .category-tag {
+        position: absolute;
+        bottom: 0.75rem;
+        left: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        background: rgba(0,0,0,0.5);
+        color: white;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+
+    .favorite-info {
+        padding: 1rem;
+    }
+
+    .favorite-info h3 {
+        font-size: 1rem;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .brand {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .color-indicator {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        margin-top: 0.5rem;
+        border: 2px solid var(--border-color);
+    }
+
+    .favorite-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Responsive */
+    @@media (max-width: 1024px) {
+        .favorites-content {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-sidebar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .favorites-container {
+            padding: 1rem;
+        }
+
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .favorites-grid {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Filtri categoria
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const favoriteCards = document.querySelectorAll('.favorite-card');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.dataset.category;
+                
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                favoriteCards.forEach(card => {
+                    if (category === 'all' || card.dataset.category === category) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Ricerca
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.toLowerCase();
+
+            favoriteCards.forEach(card => {
+                const name = card.querySelector('h3').textContent.toLowerCase();
+                const brand = card.querySelector('.brand').textContent.toLowerCase();
+                const category = card.dataset.category.toLowerCase();
+
+                if (name.includes(searchTerm) || 
+                    brand.includes(searchTerm) || 
+                    category.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Funzioni di azione
+        function viewDetails(id) {
+            window.location.href = `/Wardrobe/Details/${id}`;
+        }
+
+        function removeFavorite(id) {
+            if (confirm('Rimuovere questo capo dai preferiti?')) {
+                fetch(`/api/favorites/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        const card = document.querySelector(`.favorite-card[data-id="${id}"]`);
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.8)';
+                        setTimeout(() => {
+                            card.remove();
+                            updateStats();
+                        }, 300);
+                    }
+                })
+                .catch(error => {
+                    console.error('Errore:', error);
+                    alert('Errore durante la rimozione dai preferiti');
+                });
+            }
+        }
+
+        // Aggiorna le statistiche dopo la rimozione
+        function updateStats() {
+            const totalItems = document.querySelectorAll('.favorite-card').length;
+            const statValue = document.querySelector('.stat-value');
+            if (statValue) {
+                statValue.textContent = totalItems;
+            }
+        }
+    </script>
+}

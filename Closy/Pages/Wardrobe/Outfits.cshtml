@@ -1,0 +1,702 @@
+﻿@page
+@model Closy.Pages.Wardrobe.OutfitsModel
+@{
+    ViewData["Title"] = "I tuoi Outfit";
+}
+
+@functions {
+    string GetIconClass(string iconName) {
+        return iconName switch {
+            "flower1" => "bi-flower1",
+            "cloud-sun" => "bi-cloud-sun-fill",
+            "droplet" => "bi-droplet-fill",
+            "sun" => "bi-sun-fill",
+            "thermometer-high" => "bi-thermometer-high",
+            "umbrella" => "bi-umbrella-fill",
+            "tree" => "bi-tree-fill",
+            "cloud-rain" => "bi-cloud-rain-fill",
+            "wind" => "bi-wind",
+            "snow" => "bi-snow",
+            "thermometer-low" => "bi-thermometer-low",
+            "cloud-snow" => "bi-cloud-snow-fill",
+            _ => "bi-question-circle-fill" // Default icon
+        };
+    }
+
+    bool IsLightColor(string hexColor)
+    {
+        // Simple check for very light colors that need a border for visibility
+        return hexColor.Equals("#FFFFFF", StringComparison.OrdinalIgnoreCase) ||
+               hexColor.Equals("#F5F5DC", StringComparison.OrdinalIgnoreCase); // Beige
+    }
+}
+
+<div class="outfits-container-page">
+    <header class="page-header">
+        <div class="header-content">
+            <h1>I tuoi Outfit</h1>
+            <p class="header-description">Gestisci e organizza le tue combinazioni di abbigliamento</p>
+        </div>
+        <div>
+            <button class="btn-create btn-primary-outline me-2" id="generateOutfitBtnModal" data-bs-toggle="modal" data-bs-target="#generateOutfitModal">
+                <i class="bi bi-stars"></i> Genera con AI
+            </button>
+        </div>
+    </header>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span>@TempData["Message"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Modal for AI Outfit Generation -->
+    <div class="modal fade" id="generateOutfitModal" tabindex="-1" aria-labelledby="generateOutfitModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content glass-effect">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="generateOutfitModalLabel"><i class="bi bi-stars me-2"></i>Genera Outfit con Intelligenza Artificiale</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" asp-page-handler="GenerateOutfitInModal">
+                        @if (Model.AllClothingItems == null || !Model.AllClothingItems.Any())
+                        {
+                            <div class="alert alert-warning text-dark">
+                                <i class="bi bi-info-circle-fill me-2"></i>Il tuo guardaroba è vuoto. <a asp-page="/Wardrobe/Create" class="alert-link">Aggiungi qualche capo</a> prima di generare outfit.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">1. Scegli capi specifici (opzionale):</label>
+                                <p class="form-text text-muted-light small">Seleziona uno o più capi dal tuo guardaroba che vuoi includere. L'AI cercherà di utilizzarli. Clicca per selezionare/deselezionare.</p>
+                                
+                                <!-- Hidden select for form submission -->
+                                <select asp-for="SelectedItemIds" id="selectedItemsModalHidden" multiple="multiple" style="display: none;">
+                                    @foreach (var categoryGroup in Model.AllClothingItems.GroupBy(item => item.Category).OrderBy(g => g.Key))
+                                    {
+                                        @foreach (var item in categoryGroup.OrderBy(i => i.Name))
+                                        {
+                                            <option value="@item.Id">@item.Name (@item.Brand) - @item.Color</option>
+                                        }
+                                    }
+                                </select>
+
+                                <!-- Visible custom multi-select container -->
+                                <div id="customMultiSelectContainer" class="custom-multi-select-container">
+                                    @foreach (var categoryGroup in Model.AllClothingItems.GroupBy(item => item.Category).OrderBy(g => g.Key))
+                                    {
+                                        <div class="custom-multi-select-category-group">
+                                            <strong class="custom-multi-select-category-title">@categoryGroup.Key</strong>
+                                            @foreach (var item in categoryGroup.OrderBy(i => i.Name))
+                                            {
+                                                <div class="custom-multi-select-item" data-value="@item.Id">
+                                                    @item.Name (@item.Brand) - @item.Color
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">2. Colori preferiti (opzionale):</label>
+                                <p class="form-text text-muted-light small">Indica i colori che vorresti vedere nei suggerimenti.</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var color in Model.AvailableColorsForModal.OrderBy(c => c.Name))
+                                    {
+                                        <div>
+                                            <input type="checkbox" class="btn-check" name="SelectedModalColors" value="@color.Name" id="modal-color-@color.Name.ToLower().Replace(" ", "-")" autocomplete="off">
+                                            <label class="color-option-shared-wrapper @(IsLightColor(color.Hex) ? "light-swatch-border" : "")"
+                                                   style="background-color: @color.Hex;"
+                                                   for="modal-color-@color.Name.ToLower().Replace(" ", "-")"
+                                                   data-bs-toggle="tooltip" data-bs-placement="top" title="@color.Name"></label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">3. Stagioni (opzionale):</label>
+                                <p class="form-text text-muted-light small">Seleziona le stagioni per cui desideri gli outfit.</p>
+                                <div class="row g-2">
+                                    @foreach (var season in Model.AvailableSeasonInfosForModal)
+                                    {
+                                        <div class="col-6 col-md-3">
+                                            <input type="checkbox" class="btn-check" name="SelectedModalSeasons" value="@season.Name" id="modal-season-@season.Name.ToLower()" autocomplete="off">
+                                            <label class="btn season-btn-shared w-100" for="modal-season-@season.Name.ToLower()">
+                                                <span class="season-icons-shared">
+                                                    @foreach (var icon in season.Icons)
+                                                    {
+                                                        <i class="@GetIconClass(icon)"></i>
+                                                    }
+                                                </span>
+                                                @season.Name
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="modalOccasion" class="form-label">4. Occasione (opzionale):</label>
+                                <input type="text" asp-for="ModalOccasion" class="form-control" id="modalOccasion" placeholder="Es. Casual, Lavoro, Serata elegante">
+                                <small class="form-text text-muted-light">Descrivi l'occasione per affinare i suggerimenti.</small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-2 btn-lg">
+                                <i class="bi bi-stars"></i> Genera Suggerimenti
+                            </button>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Outfits Grid -->
+    @if (Model.Outfits != null && Model.Outfits.Any())
+    {
+        <div class="outfits-grid-display">
+            @foreach (var outfit in Model.Outfits)
+            {
+                <div class="outfit-card">
+                    <div class="outfit-header">
+                        <h3>@outfit.Name</h3>
+                        @if (!string.IsNullOrEmpty(outfit.Tags))
+                        {
+                            <div class="outfit-tags">
+                                @foreach (var tag in outfit.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    <span class="outfit-tag">@tag.Trim()</span>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div class="outfit-components">
+                        <!-- TOP ITEM -->
+                        @{
+                            var topItem = outfit.Items.FirstOrDefault(i => i.Category != null && 
+                                (i.Category.Contains("Top") || i.Category.Contains("Maglion") || 
+                                i.Category.Contains("Camici") || i.Category.Contains("Felp") || 
+                                i.Category.Contains("Magliett")));
+                        }
+                        <div class="component-card">
+                            <div class="component-title">TOP</div>
+                            @if (topItem != null)
+                            {
+                                <div class="component-image">
+                                    <img src="@topItem.ImageUrl" alt="@topItem.Name">
+                                </div>
+                                <div class="component-details">
+                                    <div class="detail-row"><span class="detail-label">Nome:</span> <span class="detail-value">@topItem.Name</span></div>
+                                    <div class="detail-row"><span class="detail-label">Brand:</span> <span class="detail-value">@(string.IsNullOrEmpty(topItem.Brand) ? "Non specificato" : topItem.Brand)</span></div>
+                                    <div class="detail-row"><span class="detail-label">Colore:</span> <span class="detail-value">@topItem.Color</span></div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="component-missing">
+                                    <i class="bi bi-question-circle"></i>
+                                    <p>Nessun capo superiore</p>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- PANTS ITEM -->
+                        @{
+                            var pantsItem = outfit.Items.FirstOrDefault(i => i.Category != null && 
+                                (i.Category.Contains("Pants") || i.Category.Contains("Pantalon") || 
+                                i.Category.Contains("Jeans") || i.Category.Contains("Gonna")));
+                        }
+                        <div class="component-card">
+                            <div class="component-title">PANTS</div>
+                            @if (pantsItem != null)
+                            {
+                                <div class="component-image">
+                                    <img src="@pantsItem.ImageUrl" alt="@pantsItem.Name">
+                                </div>
+                                <div class="component-details">
+                                    <div class="detail-row"><span class="detail-label">Nome:</span> <span class="detail-value">@pantsItem.Name</span></div>
+                                    <div class="detail-row"><span class="detail-label">Brand:</span> <span class="detail-value">@(string.IsNullOrEmpty(pantsItem.Brand) ? "Non specificato" : pantsItem.Brand)</span></div>
+                                    <div class="detail-row"><span class="detail-label">Colore:</span> <span class="detail-value">@pantsItem.Color</span></div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="component-missing">
+                                    <i class="bi bi-question-circle"></i>
+                                    <p>Nessun pantalone</p>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- SHOES ITEM -->
+                        @{
+                            var shoesItem = outfit.Items.FirstOrDefault(i => i.Category != null && 
+                                (i.Category.Contains("Shoes") || i.Category.Contains("Scarp") || 
+                                i.Category.Contains("Sneakers") || i.Category.Contains("Stival")));
+                        }
+                        <div class="component-card">
+                            <div class="component-title">SHOES</div>
+                            @if (shoesItem != null)
+                            {
+                                <div class="component-image">
+                                    <img src="@shoesItem.ImageUrl" alt="@shoesItem.Name">
+                                </div>
+                                <div class="component-details">
+                                    <div class="detail-row"><span class="detail-label">Nome:</span> <span class="detail-value">@shoesItem.Name</span></div>
+                                    <div class="detail-row"><span class="detail-label">Brand:</span> <span class="detail-value">@(string.IsNullOrEmpty(shoesItem.Brand) ? "Non specificato" : shoesItem.Brand)</span></div>
+                                    <div class="detail-row"><span class="detail-label">Colore:</span> <span class="detail-value">@shoesItem.Color</span></div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="component-missing">
+                                    <i class="bi bi-question-circle"></i>
+                                    <p>Nessuna scarpa</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="outfit-actions">
+                        <button class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Modifica
+                        </button>
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@outfit.Id" onsubmit="return confirm('Sei sicuro di voler eliminare questo outfit?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i> Elimina
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="bi bi-columns-gap"></i>
+            </div>
+            <h2>Nessun outfit trovato</h2>
+            <p>Non hai ancora creato nessun outfit. Inizia subito a combinare i tuoi capi!</p>
+            <button class="btn btn-outline-primary btn-lg ms-2" data-bs-toggle="modal" data-bs-target="#generateOutfitModal">
+                <i class="bi bi-stars"></i> Prova la generazione AI
+            </button>
+        </div>
+    }
+</div>
+
+<style>
+    /* Styles specific to Outfits page - can be moved to site.css if preferred */
+    .outfits-grid-display {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .outfit-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .outfit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+    }
+
+    .outfit-header {
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        background: #f8f9fa;
+    }
+
+    .outfit-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .outfit-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .outfit-tag {
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+    }
+
+    .outfit-components {
+        padding: 1rem;
+    }
+
+    .component-card {
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .component-title {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.5rem;
+        text-align: center;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+
+    .component-image {
+        height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+    }
+
+    .component-image img {
+        max-width: 100%;
+        max-height: 160px;
+        object-fit: contain;
+    }
+
+    .component-details {
+        padding: 0.75rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .detail-row {
+        display: flex;
+        margin-bottom: 0.3rem;
+        font-size: 0.9rem;
+    }
+
+    .detail-label {
+        min-width: 60px;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .detail-value {
+        color: #212529;
+    }
+
+    .component-missing {
+        padding: 2rem 1rem;
+        text-align: center;
+        color: #6c757d;
+        background: #f8f9fa;
+    }
+
+    .component-missing i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
+
+    .outfit-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .header-content h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .header-description {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    .btn-create {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-create:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+    .btn-create.btn-primary-outline {
+        background-color: transparent;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+    }
+    .btn-create.btn-primary-outline:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    /* Empty state */
+    .empty-state {
+        grid-column: 1 / -1; /* Span across all columns if grid is active */
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        margin-top: 2rem; /* Add some margin if it's the only thing on the page */
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+    }
+
+    /* Modal specific styles */
+    .modal-content.glass-effect {
+        color: var(--white); /* Light text for dark glass */
+    }
+    .modal-content.glass-effect .form-label,
+    .modal-content.glass-effect .modal-title {
+        color: var(--white);
+    }
+    .modal-content.glass-effect .form-control,
+    .modal-content.glass-effect .form-select {
+        background-color: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.3);
+        color: var(--white);
+    }
+    .modal-content.glass-effect .form-control::placeholder {
+        color: rgba(255,255,255,0.7);
+    }
+    .modal-content.glass-effect .form-text {
+        color: rgba(255,255,255,0.8) !important;
+    }
+    .text-muted-light {
+        color: rgba(255,255,255,0.8) !important;
+    }
+
+    /* Custom Multi-select Styles */
+    .custom-multi-select-container {
+       background-color: rgba(255,255,255,0.1);
+       border: 1px solid rgba(255,255,255,0.3) !important;
+       border-radius: .25rem;
+       padding: .5rem;
+       max-height: 200px; /* Or your preferred height */
+       overflow-y: auto;
+    }
+
+   .custom-multi-select-category-group {
+       margin-bottom: 0.5rem;
+   }
+
+   .custom-multi-select-category-title {
+       display: block;
+       margin-bottom: 0.25rem;
+       color: rgba(255,255,255,0.9);
+       font-size: 0.9em;
+       font-weight: bold;
+   }
+
+   .custom-multi-select-item {
+       padding: 0.375rem 0.75rem;
+       margin-bottom: 0.25rem;
+       border-radius: .25rem;
+       cursor: pointer;
+       transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+       background-color: rgba(255,255,255,0.05);
+       border: 1px solid rgba(255,255,255,0.2);
+       color: rgba(255,255,255,0.85);
+   }
+
+   .custom-multi-select-item:hover {
+       background-color: rgba(255,255,255,0.2);
+       border-color: rgba(255,255,255,0.4);
+   }
+
+   .custom-multi-select-item.selected {
+       background-color: var(--bs-primary); /* Using Bootstrap primary color */
+       color: white;
+       border-color: var(--bs-primary);
+   }
+   /* End Custom Multi-select Styles */
+
+    /* Responsive adjustments for the grid */
+    @@media (max-width: 992px) {
+        .outfits-grid-display {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .outfits-container-page {
+            padding: 1rem;
+        }
+
+        .outfits-grid-display {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+         .page-header > div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        .page-header .btn-create {
+            width: 100%;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+        // Custom multi-select logic
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.getElementById('customMultiSelectContainer');
+            const hiddenSelect = document.getElementById('selectedItemsModalHidden');
+
+            if (container && hiddenSelect) {
+                const items = container.querySelectorAll('.custom-multi-select-item');
+
+                items.forEach(item => {
+                    item.addEventListener('click', function () {
+                        this.classList.toggle('selected');
+                        const value = this.getAttribute('data-value');
+                        const option = hiddenSelect.querySelector(`option[value="${value}"]`);
+                        if (option) {
+                            option.selected = this.classList.contains('selected');
+                        }
+                    });
+                });
+
+                // Function to sync visual selection from hidden select (e.g., on page load if model has values)
+                function syncVisualSelection() {
+                    Array.from(hiddenSelect.options).forEach(option => {
+                        const visualItem = container.querySelector(`.custom-multi-select-item[data-value="${option.value}"]`);
+                        if (visualItem) {
+                            if (option.selected) {
+                                visualItem.classList.add('selected');
+                            } else {
+                                visualItem.classList.remove('selected');
+                            }
+                        }
+                    });
+                }
+                syncVisualSelection(); // Initial sync
+
+                 // Observe changes in the hidden select if it's manipulated by other scripts (e.g. form.reset())
+                const observer = new MutationObserver(syncVisualSelection);
+                observer.observe(hiddenSelect, { childList: true, subtree: true, attributes: true, attributeFilter: ['selected'] });
+                 // Also re-sync if options are dynamically added/removed, though less likely here
+                const optionObserver = new MutationObserver(function() {
+                    // Re-query items if options change, though not expected for this use case
+                    // items = container.querySelectorAll('.custom-multi-select-item');
+                    syncVisualSelection();
+                });
+                optionObserver.observe(hiddenSelect, { childList: true });
+
+
+            }
+
+            var generateOutfitModalEl = document.getElementById('generateOutfitModal');
+            if (generateOutfitModalEl) {
+                generateOutfitModalEl.addEventListener('hidden.bs.modal', function (event) {
+                    var form = this.querySelector('form');
+                    if (form) {
+                        form.reset(); // This should clear the hiddenSelect's selected options
+                    }
+                    
+                    // Explicitly clear visual selection for custom items
+                    if (container) {
+                        container.querySelectorAll('.custom-multi-select-item.selected').forEach(selectedItem => {
+                            selectedItem.classList.remove('selected');
+                        });
+                    }
+                    // Ensure hidden select options are truly deselected if form.reset() has timing issues or doesn't trigger observers fast enough
+                    if (hiddenSelect) {
+                         Array.from(hiddenSelect.options).forEach(opt => {
+                             if (opt.selected) opt.selected = false; // Explicitly deselect
+                         });
+                         // Trigger a change event if necessary for other listeners, though not strictly for this setup
+                         // hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+            }
+        });
+
+    </script>
+}

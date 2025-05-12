@@ -1,0 +1,566 @@
+﻿@page
+@model closy.Pages.RegisterModel
+@{
+    ViewData["Title"] = "Registrazione";
+    ViewData["BodyClass"] = "auth-page";
+    Layout = "_LayoutNoSidebar";
+
+}
+
+<div class="register-container">
+    <!-- Sezione visuale/illustrativa -->
+    <div class="register-visual">
+        <div class="visual-content">
+            <div class="brand-logo">
+                <i class="bi bi-handbag"></i>
+                <span>Closy</span>
+            </div>
+
+            <div class="slogan">
+                <h2>Il tuo guardaroba digitale, sempre con te</h2>
+                <p>Organizza, combina e scopri nuovi outfit con l'aiuto dell'intelligenza artificiale</p>
+            </div>
+
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-collection"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Cataloga il tuo stile</h3>
+                        <p>Importa e organizza tutti i tuoi capi in un guardaroba virtuale accessibile ovunque</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-layers"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Crea outfit perfetti</h3>
+                        <p>Combina facilmente i tuoi capi e salva le tue combinazioni preferite</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Suggerimenti AI</h3>
+                        <p>Ricevi consigli personalizzati sul tuo stile grazie all'intelligenza artificiale</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visual-footer">
+                <p>"La moda passa, lo stile resta." — Coco Chanel</p>
+            </div>
+        </div>
+
+        <div class="visual-overlay"></div>
+    </div>
+
+    <!-- Form di registrazione -->
+    <div class="register-form-container">
+        <div class="form-header">
+            <div class="mobile-logo">
+                <i class="bi bi-handbag"></i>
+                <span>Closy</span>
+            </div>
+            <h1>Crea il tuo account</h1>
+            <p>Inizia a organizzare il tuo guardaroba digitale</p>
+        </div>
+
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="register-form needs-validation" novalidate>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Input.Nome">
+                        <i class="bi bi-person"></i> Nome
+                    </label>
+                    <input asp-for="Input.Nome" class="form-control" autocomplete="given-name" aria-required="true" placeholder="Il tuo nome" />
+                    <span asp-validation-for="Input.Nome" class="invalid-feedback"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.Cognome">
+                        <i class="bi bi-person"></i> Cognome
+                    </label>
+                    <input asp-for="Input.Cognome" class="form-control" autocomplete="family-name" aria-required="true" placeholder="Il tuo cognome" />
+                    <span asp-validation-for="Input.Cognome" class="invalid-feedback"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Email">
+                    <i class="bi bi-envelope"></i> Email
+                </label>
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="nome@esempio.com" />
+                <span asp-validation-for="Input.Email" class="invalid-feedback"></span>
+            </div>
+
+            <div class="form-group password-group">
+                <label asp-for="Input.Password">
+                    <i class="bi bi-lock"></i> Password
+                </label>
+                <div class="input-with-icon">
+                    <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="La tua password" id="password" />
+                    <button type="button" class="toggle-password" tabindex="-1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="Input.Password" class="invalid-feedback"></span>
+
+                <div class="password-strength" id="password-strength">
+                    <div class="strength-meter">
+                        <div class="strength-meter-fill" id="strength-meter-fill"></div>
+                    </div>
+                    <div id="password-strength-text">La password deve avere almeno 6 caratteri</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.ConfirmPassword">
+                    <i class="bi bi-shield-lock"></i> Conferma Password
+                </label>
+                <div class="input-with-icon">
+                    <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Conferma password" id="confirmPassword" />
+                    <button type="button" class="toggle-password" tabindex="-1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="Input.ConfirmPassword" class="invalid-feedback"></span>
+            </div>
+
+            <div class="form-group terms-checkbox">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="termsCheckbox" required>
+                    <label class="form-check-label" for="termsCheckbox">
+                        Accetto i <a href="#" class="terms-link">Termini di servizio</a> e l'<a href="#" class="terms-link">Informativa privacy</a>
+                    </label>
+                    <div class="invalid-feedback">
+                        È necessario accettare i termini per continuare
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button id="registerSubmit" type="submit" class="btn btn-primary btn-register">
+                    <span>Crea account</span>
+                    <i class="bi bi-arrow-right-circle"></i>
+                </button>
+            </div>
+
+            <div class="alternative-actions">
+                <p>Hai già un account? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="accent-link">Accedi</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #6a5acd;
+        --primary-dark: #5a4abf;
+        --primary-light: #8474e5;
+        --secondary-color: #9370db;
+        --accent-color: #7b68ee;
+        --text-color: #333;
+        --text-light: #6c757d;
+        --text-dark: #212529;
+        --light-color: #f8f9fa;
+        --border-color: #e0e0e0;
+        --border-radius: 10px;
+        --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .register-container {
+        display: flex;
+        min-height: 100vh;
+        overflow: hidden;
+    }
+
+    /* Visual Section */
+    .register-visual {
+        flex: 1.2;
+        position: relative;
+        background-image: url('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        padding: 3rem;
+    }
+
+    .visual-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(106, 90, 205, 0.9) 0%, rgba(147, 112, 219, 0.8) 100%);
+        z-index: 1;
+    }
+
+    .visual-content {
+        position: relative;
+        z-index: 2;
+        max-width: 600px;
+    }
+
+    .brand-logo {
+        display: flex;
+        align-items: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+    }
+
+        .brand-logo i {
+            margin-right: 1rem;
+            font-size: 2.5rem;
+        }
+
+    .slogan {
+        margin-bottom: 3rem;
+    }
+
+        .slogan h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .slogan p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+    .features {
+        margin-bottom: 3rem;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+
+    .feature-icon {
+        width: 48px;
+        height: 48px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1.5rem;
+        font-size: 1.5rem;
+    }
+
+    .feature-text h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .feature-text p {
+        font-size: 0.95rem;
+        opacity: 0.8;
+        line-height: 1.5;
+    }
+
+    .visual-footer {
+        font-style: italic;
+        opacity: 0.8;
+    }
+
+    /* Form Section */
+    .register-form-container {
+        flex: 0.8;
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background-color: white;
+        overflow-y: auto;
+    }
+
+    .mobile-logo {
+        display: none;
+    }
+
+    .form-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+        .form-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+    .register-form {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+    .form-control {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(106, 90, 205, 0.25);
+        }
+
+    .input-with-icon {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-light);
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .password-strength {
+        margin-top: 0.75rem;
+    }
+
+    .strength-meter {
+        height: 6px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+    }
+
+    .strength-meter-fill {
+        height: 100%;
+        border-radius: 3px;
+        width: 0;
+        transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    #password-strength-text {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    .terms-checkbox {
+        margin-bottom: 2rem;
+    }
+
+    .terms-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+        .terms-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+    .btn-register {
+        width: 100%;
+        background-color: var(--primary-color);
+        border: none;
+        color: white;
+        padding: 0.9rem 1.5rem;
+        font-size: 1.1rem;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(106, 90, 205, 0.3);
+    }
+
+        .btn-register:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(106, 90, 205, 0.4);
+        }
+
+    .alternative-actions {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: var(--text-light);
+    }
+
+    .accent-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+        .accent-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+            togglePasswordButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentElement.querySelector('input');
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+
+                    // Toggle icon
+                    const icon = this.querySelector('i');
+                    icon.classList.toggle('bi-eye');
+                    icon.classList.toggle('bi-eye-slash');
+                });
+            });
+
+            // Password strength meter
+            const passwordInput = document.getElementById('password');
+            const strengthMeterFill = document.getElementById('strength-meter-fill');
+            const strengthText = document.getElementById('password-strength-text');
+
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                let strength = 0;
+                let message = '';
+
+                // Check length
+                if (password.length >= 8) {
+                    strength += 25;
+                } else if (password.length >= 6) {
+                    strength += 10;
+                }
+
+                // Check lowercase and uppercase
+                if (password.match(/[a-z]/) && password.match(/[A-Z]/)) {
+                    strength += 25;
+                } else if (password.match(/[a-z]/) || password.match(/[A-Z]/)) {
+                    strength += 10;
+                }
+
+                // Check numbers
+                if (password.match(/[0-9]/)) {
+                    strength += 25;
+                }
+
+                // Check special chars
+                if (password.match(/[^a-zA-Z0-9]/)) {
+                    strength += 25;
+                }
+
+                // Update visuals
+                strengthMeterFill.style.width = strength + '%';
+
+                // Set color based on strength
+                if (strength < 25) {
+                    strengthMeterFill.style.backgroundColor = '#e5383b'; // Molto debole
+                    message = 'Password troppo debole';
+                } else if (strength < 50) {
+                    strengthMeterFill.style.backgroundColor = '#ffbe0b'; // Debole
+                    message = 'Password debole';
+                } else if (strength < 75) {
+                    strengthMeterFill.style.backgroundColor = '#38b000'; // Media
+                    message = 'Password accettabile';
+                } else {
+                    strengthMeterFill.style.backgroundColor = '#38b000'; // Forte
+                    message = 'Password forte';
+                }
+
+                if (password === '') {
+                    message = 'La password deve avere almeno 6 caratteri';
+                }
+
+                strengthText.textContent = message;
+            });
+
+            // Form animation
+            const formElements = document.querySelectorAll('.register-form .form-group');
+            formElements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                element.style.transition = `opacity 0.5s ease, transform 0.5s ease`;
+
+                setTimeout(() => {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, 100 + (index * 100));
+            });
+
+            // Bootstrap custom validation
+            (function() {
+                'use strict'
+
+                // Fetch all forms to which we want to apply custom validation
+                var forms = document.querySelectorAll('.needs-validation')
+
+                // Loop over them and prevent submission
+                Array.prototype.slice.call(forms)
+                    .forEach(function(form) {
+                        form.addEventListener('submit', function(event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
+        });
+    </script>
+}

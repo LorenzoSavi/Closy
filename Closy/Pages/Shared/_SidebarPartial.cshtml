@@ -1,0 +1,366 @@
+﻿<aside class="sidebar">
+    <!-- Profile Section -->
+    <div class="profile-section mb-4">
+        <div class="profile-header">
+            <div class="profile-cover"></div>
+            <div class="profile-avatar">
+                <div class="avatar-circle">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+        </div>
+        <div class="profile-info text-center">
+            @{
+                var fullName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value
+                ?? User.Claims.FirstOrDefault(c => c.Type == "name")?.Value
+                ?? User.Identity?.Name?.Split('@')[0];
+
+                if (fullName?.Contains('.') == true)
+                {
+                    fullName = string.Join(" ", fullName.Split('.')
+                    .Select(part => char.ToUpper(part[0]) + part.Substring(1)));
+                }
+            }
+            <h5 class="mb-1">@fullName</h5>
+            <p class="text-muted mb-2">
+                <i class="bi bi-wardrobe2 me-1"></i>
+                Il tuo guardaroba
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="sidebar-nav mb-4">
+        <div class="nav-section">
+            <h6 class="nav-header">
+                <i class="bi bi-grid-fill me-2"></i>
+                ESPLORA
+            </h6>
+            <div class="nav-items">
+                <a href="/Wardrobe/AllItems" class="nav-link @(Context.Request.Path.Value?.EndsWith("/AllItems") == true ? "active" : "")">
+                    <div class="nav-link-icon">
+                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                    </div>
+                    <span>Tutti i capi</span>
+                    <span class="nav-indicator">
+                        <i class="bi bi-chevron-right"></i>
+                    </span>
+                </a>
+
+                <a href="/Wardrobe/Outfits" class="nav-link @(Context.Request.Path.Value?.EndsWith("/Outfits") == true ? "active" : "")">
+                    <div class="nav-link-icon">
+                        <i class="bi bi-collection"></i>
+                    </div>
+                    <span>Outfit</span>
+                    <span class="nav-indicator">
+                        <i class="bi bi-chevron-right"></i>
+                    </span>
+                </a>
+
+                <a href="/Wardrobe/Create" class="nav-link @(Context.Request.Path.Value?.EndsWith("/Create") == true ? "active" : "")">
+                    <div class="nav-link-icon">
+                        <i class="bi bi-plus-circle-fill"></i>
+                    </div>
+                    <span>Aggiungi capo</span>
+                    <span class="nav-indicator">
+                        <i class="bi bi-chevron-right"></i>
+                    </span>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-section mt-4">
+            <h6 class="nav-header">
+                <i class="bi bi-gear-fill me-2"></i>
+                STRUMENTI
+            </h6>
+            
+        </div>
+    </nav>
+
+    <!-- Bottom Actions -->
+    <div class="sidebar-footer">
+        <form method="post" asp-page="/Logout" asp-route-returnUrl="@Url.Page("/Login", new { area = "" })">
+            <button type="submit" class="btn-logout">
+                <i class="bi bi-box-arrow-left"></i>
+                <span>Logout</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+
+
+<style>
+    /* Sidebar Styles */
+    .sidebar {
+        width: var(--sidebar-width);
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background: var(--white);
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    /* Profile Section */
+    .profile-section {
+        position: relative;
+    }
+
+    .profile-header {
+        position: relative;
+        height: 100px;
+    }
+
+    .profile-cover {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        border-radius: 0 0 20px 20px;
+    }
+
+    .profile-avatar {
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        background: var(--white);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 3px solid var(--white);
+    }
+
+        .avatar-circle i {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+    .profile-info {
+        padding: 2rem 1rem 1rem;
+    }
+
+    .profile-stats {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--background-color);
+        border-radius: 20px;
+        font-size: 0.875rem;
+    }
+
+    /* Navigation */
+    .nav-section {
+        padding: 0 1rem;
+    }
+
+    .nav-header {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+        padding: 0 0.5rem;
+    }
+
+    .nav-items {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+    }
+
+        .nav-link:hover {
+            background: var(--background-color);
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+    .nav-link-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        margin-right: 12px;
+        background: rgba(var(--bs-primary-rgb), 0.1);
+        color: var(--primary-color);
+    }
+
+    .active .nav-link-icon {
+        background: rgba(255,255,255,0.2);
+        color: var(--white);
+    }
+
+    .nav-indicator {
+        margin-left: auto;
+        opacity: 0.5;
+        transition: all 0.3s ease;
+    }
+
+    .nav-link:hover .nav-indicator {
+        opacity: 1;
+        transform: translateX(5px);
+    }
+
+    /* Footer */
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 1rem;
+    }
+
+    .btn-logout {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem;
+        border-radius: 12px;
+        background: var(--danger-color);
+        color: var(--white);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(var(--bs-danger-rgb), 0.3);
+        }
+
+    
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .sidebar
+
+    {
+        width: 70px;
+    }
+
+    .sidebar:hover {
+        width: var(--sidebar-width);
+    }
+
+    .profile-info span,
+    .nav-link span,
+    .profile-stats,
+    .app-version {
+        display: none;
+    }
+
+    .sidebar:hover .profile-info span,
+    .sidebar:hover .nav-link span,
+    .sidebar:hover .profile-stats,
+    .sidebar:hover .app-version {
+        display: initial;
+    }
+
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+    }
+
+        .avatar-circle i {
+            font-size: 1.2rem;
+        }
+
+    .profile-cover {
+        height: 40px;
+    }
+
+    .profile-header {
+        height: 60px;
+    }
+
+    }
+
+    /* Aggiungi transizione per i cambi di colore */
+    :root {
+        transition: all 0.3s ease;
+    }
+
+    /* Stili specifici per il tema scuro */
+    
+
+    /* Aggiungi icone specifiche per il tema */
+    .theme-btn[data-theme="light"] i {
+        color: #FDB813;
+    }
+
+    .theme-btn[data-theme="dark"] i {
+        color: #7B68EE;
+    }
+
+    /* Effetto hover migliorato per i bottoni tema */
+    .theme-btn {
+        cursor: pointer;
+    }
+
+        .theme-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .theme-btn.active {
+            position: relative;
+        }
+
+            .theme-btn.active::after {
+                content: '';
+                position: absolute;
+                bottom: -5px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 20px;
+                height: 2px;
+                background: var(--primary-color);
+                border-radius: 2px;
+            }
+
+</style>
+
+<script>
+    
+    
+</script>

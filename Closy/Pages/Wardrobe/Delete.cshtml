@@ -1,0 +1,90 @@
+@page
+@model Closy.Pages.Wardrobe.DeleteModel
+@{
+    ViewData["Title"] = "Elimina capo";
+}
+
+<div class="container wardrobe-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="page-title">Elimina capo</h1>
+                    <p class="text-muted">Sei sicuro di voler eliminare questo capo?</p>
+                </div>
+                <div>
+                    <a href="@Url.Page("./Details", new { id = Model.ClothingItem?.Id })" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Torna indietro
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    @if (Model.ClothingItem != null)
+                    {
+                        <div class="text-center mb-4">
+                            @if (!string.IsNullOrEmpty(Model.ClothingItem.ImageUrl))
+                            {
+                                <img src="@Model.ClothingItem.ImageUrl" class="img-fluid item-image rounded mb-3" 
+                                     style="max-height:200px;" alt="@Model.ClothingItem.Name">
+                            }
+                            else
+                            {
+                                <div class="placeholder-image mb-3" style="background-color: @Model.ClothingItem.Color">
+                                    <i class="bi bi-question-circle"></i>
+                                </div>
+                            }
+
+                            <h3 class="card-title">@Model.ClothingItem.Name</h3>
+                            <p class="text-muted">@Model.ClothingItem.Brand @(string.IsNullOrEmpty(Model.ClothingItem.Brand) ? "" : " · ") @Model.ClothingItem.Category</p>
+                        </div>
+
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Attenzione:</strong> questa operazione non può essere annullata.
+                            Il capo verrà rimosso anche da tutti gli outfit in cui è presente.
+                        </div>
+
+                        <form method="post">
+                            <input type="hidden" asp-for="ClothingItem.Id" />
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash3-fill me-2"></i>Elimina definitivamente
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            Capo non trovato.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .placeholder-image {
+        width: 100%;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+    
+    .placeholder-image i {
+        font-size: 3rem;
+        color: white;
+        opacity: 0.6;
+    }
+</style>
